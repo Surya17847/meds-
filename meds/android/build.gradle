@@ -7,6 +7,7 @@ buildscript {
         // Add the classpath here
         classpath "com.android.tools.build:gradle:8.1.0" // Example Gradle Plugin version
         classpath "com.google.gms:google-services:4.4.2"
+
     }
 }
 allprojects {
