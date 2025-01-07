@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meds/screens/giver/donor_options_page.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DonateMedicinePage extends StatefulWidget {
   @override
@@ -53,21 +54,33 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
   // Submit donation to Firestore
   Future<void> _submitDonation() async {
     try {
+      // Initialize Firestore
       final firestore = FirebaseFirestore.instance;
-      final donorDocRef = firestore.collection('Donors_Users').doc('harshpatil@gmail.com');
+
+      // Fetch the logged-in user's UID
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception("User is not logged in. Please log in to proceed.");
+      }
+
+      // Reference the user's document in Firestore using their UID
+      final donorDocRef = firestore.collection('users').doc(user.uid);
       final donorSnapshot = await donorDocRef.get();
 
       if (!donorSnapshot.exists) {
-        throw Exception("Donor data not found in Firestore. Please log in again.");
+        throw Exception("User data not found in Firestore. Please log in again.");
       }
 
+      // Fetch the donor's donation count
       int donationCount = 0;
       if (donorSnapshot.data()!.containsKey('donationCount')) {
         donationCount = donorSnapshot.data()!['donationCount'] as int;
       }
 
+      // Increment the donation count
       donationCount++;
 
+      // Create the medicine donation data
       final medicineData = {
         'MedicineName': _medicineNameController.text,
         'Strength': _strengthController.text,
@@ -79,20 +92,26 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
         'DonationDate': DateTime.now().toIso8601String(),
       };
 
+      // Add the medicine data to a "Medicine" subcollection
       await donorDocRef.collection('Medicine').doc('Dn_no_$donationCount').set(medicineData);
+
+      // Update the donation count in the main donor document
       await donorDocRef.set({'donationCount': donationCount}, SetOptions(merge: true));
 
+      // Navigate to confirmation page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => DonationConfirmationPage()),
       );
     } catch (e) {
+      // Show error message in a SnackBar
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Error: ${e.toString()}"),
-        backgroundColor: AppColors.errorColor,
+        backgroundColor: Colors.red,
       ));
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -255,8 +274,8 @@ class DonationConfirmationPage extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => DonorOptionsPage()),
                     );
                   },
-                  child: Text("Back"),
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonPrimaryColor),
+                  child: Text("Back",style: TextStyle(color:Colors.white),),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonPrimaryColor , )
                 )
               ],
             ),
