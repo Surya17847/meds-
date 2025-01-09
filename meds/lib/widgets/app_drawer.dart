@@ -4,7 +4,7 @@ import 'package:meds/widgets/profile.dart'; // Assuming this is the correct path
 import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
-
+import 'package:meds/screens/Status/board_selector.dart';
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -93,6 +93,16 @@ class AppDrawer extends StatelessWidget {
               title: Text('Giver', style: AppFonts.body),
               onTap: () {
                 Navigator.pushNamed(context, '/giver');
+              },
+            ),
+            Divider(color: AppColors.primaryColor.withOpacity(0.5)),
+            ListTile(
+              leading: Icon(Icons.check_circle, color: AppColors.primaryColor),
+              title: Text('Status', style: AppFonts.body),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const board_selector()),
+                );
               },
             ),
             Divider(color: AppColors.primaryColor.withOpacity(0.5)),

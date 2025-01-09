@@ -29,6 +29,10 @@ class FirebaseServices {
   // Sign in with Google
   Future<UserCredential?> signInWithGoogle() async {
     try {
+      // Sign out any previously signed-in account
+      await googleSignIn.signOut();
+
+      // Start the Google sign-in process
       final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
 
       if (googleSignInAccount != null) {
@@ -39,7 +43,7 @@ class FirebaseServices {
           idToken: googleSignInAuthentication.idToken,
         );
 
-        // Return the UserCredential for further use
+        // Sign in with the Google credentials
         return await auth.signInWithCredential(authCredential);
       } else {
         print('Google sign-in was cancelled by the user.');

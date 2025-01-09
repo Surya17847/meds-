@@ -20,23 +20,21 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
   // Fetch Medicines from Firestore
   Future<void> fetchMedicines() async {
     try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection('Donors_Users')
-          .get();
+      QuerySnapshot querySnapshot = await _firestore.collection('users').get();
 
       List<Map<String, dynamic>> tempList = [];
 
       // Loop through each donor to fetch medicines
-      for (var donorDoc in querySnapshot.docs) {
+      for (var userDoc in querySnapshot.docs) {
         var medicinesCollection = await _firestore
-            .collection('Donors_Users')
-            .doc(donorDoc.id)
+            .collection('users')
+            .doc(userDoc.id)
             .collection('Medicine')
             .get();
 
         for (var medicineDoc in medicinesCollection.docs) {
           Map<String, dynamic> medicineData = medicineDoc.data();
-          medicineData['donorEmail'] = donorDoc.id; // Add donor email to medicine data
+          medicineData['donorEmail'] = userDoc.get('email'); // Add donor email
           tempList.add(medicineData);
         }
       }
@@ -91,7 +89,7 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
                         // Medicine Image Placeholder
                         Image.asset(
                           medicine['ImagePath'] ?? 'assets/images/placeholder.png',
-                          width: 50,
+                          width: 30,
                           height: 50,
                           fit: BoxFit.cover,
                         ),
@@ -105,15 +103,88 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
                               Text(
                                 '${medicine['MedicineName'] ?? "Unknown Medicine"}',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.green
                                 ),
                               ),
-                              Text('Manufacturer: ${medicine['Manufacturer'] ?? "Unknown"}'),
-                              Text('Expiry Date: ${medicine['ExpirationDate'] ?? "N/A"}'),
-                              Text('Donor Email: ${medicine['donorEmail'] ?? "Unknown"}'),
-                              Text('Quantity: ${medicine['Quantity'] ?? "N/A"}'),
-                              Text('Strength: ${medicine['Strength'] ?? "N/A"}'),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Manufacturer: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold, // Bold for static text
+                                        color: Colors.black, // Add color if needed
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: '${medicine['Manufacturer'] ?? "Unknown"}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.normal, // Regular weight for dynamic data
+                                        color: Colors.black, // Add color if needed
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Expiry Date: ',
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                                    ),
+                                    TextSpan(
+                                      text: '${medicine['ExpirationDate'] ?? "N/A"}',
+                                      style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Donor Email: ',
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                                    ),
+                                    TextSpan(
+                                      text: '${medicine['donorEmail'] ?? "Unknown"}',
+                                      style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Quantity: ',
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                                    ),
+                                    TextSpan(
+                                      text: '${medicine['Quantity'] ?? "N/A"}',
+                                      style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Strength: ',
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                                    ),
+                                    TextSpan(
+                                      text: '${medicine['Strength'] ?? "N/A"}',
+                                      style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
                             ],
                           ),
                         ),
