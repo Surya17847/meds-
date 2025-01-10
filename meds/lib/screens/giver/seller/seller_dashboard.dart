@@ -3,7 +3,12 @@ import 'package:meds/screens/giver/seller/sell_medicines.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart'; // Importing app_colors.dart
 import 'package:meds/utils/ui_helper/app_fonts.dart'; // Importing app_fonts.dart
 
-class SellerDashboard extends StatelessWidget {
+class SellerDashboard extends StatefulWidget {
+  @override
+  State<SellerDashboard> createState() => _SellerDashboardState();
+}
+
+class _SellerDashboardState extends State<SellerDashboard> {
   final List<Map<String, dynamic>> medicines = [
     {
       'name': 'Paracetamol',
@@ -25,6 +30,9 @@ class SellerDashboard extends StatelessWidget {
     },
     // Add more medicines here
   ];
+
+  List<Map<String, dynamic>> filteredMedicines = [];
+  TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

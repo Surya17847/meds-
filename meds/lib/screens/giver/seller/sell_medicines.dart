@@ -1,12 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:meds/screens/giver/donor_options_page.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MaterialApp(home: SellMedicinePage()));
+}
 
 class SellMedicinePage extends StatefulWidget {
   @override
@@ -89,10 +98,10 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'medicine_name': _medicineNameController.text,
-          'composition_mg': double.parse(_compositionMgController.text),
-          'quantity': int.parse(_quantityController.text),
-          'price': double.parse(_priceController.text),
-          'remaining_quantity': int.parse(_remainingQuantityController.text),
+          'composition_mg': double.tryParse(_compositionMgController.text) ?? 0.0,
+          'quantity': int.tryParse(_quantityController.text) ?? 0,
+          'price': double.tryParse(_priceController.text) ?? 0.0,
+          'remaining_quantity': int.tryParse(_remainingQuantityController.text) ?? 0,
           'expiry_date': _dateController.text,
         }),
       );
@@ -107,6 +116,51 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
       }
     } catch (e) {
       print('Error: $e');
+    }
+  }
+
+  Future<void> _sellMedicine() async {
+    try {
+      final medicineData = {
+        'medicine_name': _medicineNameController.text,
+        'composition_mg': double.tryParse(_compositionMgController.text) ?? 0.0,
+        'quantity': int.tryParse(_quantityController.text) ?? 0,
+        'price': double.tryParse(_priceController.text) ?? 0.0,
+        'remaining_quantity': int.tryParse(_remainingQuantityController.text) ?? 0,
+        'expiry_date': _dateController.text,
+        'selled_price': double.tryParse(_predictedPriceController.text) ?? 0.0,
+        'timestamp': FieldValue.serverTimestamp(),
+      };
+
+      final firestore = FirebaseFirestore.instance;
+      final user=FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception("User is not logged in. Please log in to proceed.");
+      }
+
+      final sellDocRef=firestore.collection('users').doc(user.uid);
+      final SellSnapshot=await sellDocRef.get();
+      if(!SellSnapshot.exists){
+        throw Exception("User data not found in Firestore. Please log in again.");
+      }
+
+      int selling_count=0;
+      if (SellSnapshot.data()!.containsKey('SellingCount')) {
+        selling_count = SellSnapshot.data()!['SellingCount'] as int;
+      }
+      selling_count++;
+
+      await sellDocRef.collection('Medicine').doc('Sell_no_$selling_count').set(medicineData);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SellConfirmationPage()),
+      );
+    } catch (e) {
+      print('Error while saving medicine data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save medicine details.')),
+      );
     }
   }
 
@@ -196,6 +250,10 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
               ElevatedButton(
                 onPressed: _fetchPredictedPrice,
                 child: Text('Get Prediction'),
+              ),
+              ElevatedButton(
+                onPressed: _sellMedicine,
+                child: Text('Sell Medicine'),
               ),
             ],
           ),
