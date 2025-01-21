@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth
 
-class DonatedMed extends StatefulWidget {
+class SelledMed extends StatefulWidget {
   @override
   _DonatedMed_pageState createState() => _DonatedMed_pageState();
 }
 
-class _DonatedMed_pageState extends State<DonatedMed> {
+class _DonatedMed_pageState extends State<SelledMed> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth =
+      FirebaseAuth.instance; // FirebaseAuth instance to get current user
   List<Map<String, dynamic>> medicinesList = [];
 
   @override
@@ -18,20 +19,26 @@ class _DonatedMed_pageState extends State<DonatedMed> {
     fetchMedicines();
   }
 
+  // Fetch Medicines from Firestore (only for the current user)
   Future<void> fetchMedicines() async {
     try {
-      User? currentUser = _auth.currentUser;
+      User? currentUser = _auth.currentUser; // Get current user
+
       if (currentUser != null) {
+        // Fetch medicines only for the current user
         var medicinesCollection = await _firestore
             .collection('users')
-            .doc(currentUser.uid)
-            .collection('Donated Medicine')
+            .doc(currentUser.uid) // Use current user's UID to fetch their data
+            .collection('Selled Medicine')
             .get();
 
         List<Map<String, dynamic>> tempList = [];
+
+        // Loop through medicines for the current user
         for (var medicineDoc in medicinesCollection.docs) {
           Map<String, dynamic> medicineData = medicineDoc.data();
-          medicineData['donorEmail'] = currentUser.email;
+          medicineData['donorEmail'] =
+              currentUser.email; // Add current user's email as donor email
           tempList.add(medicineData);
         }
 
@@ -50,19 +57,19 @@ class _DonatedMed_pageState extends State<DonatedMed> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Donated Medicines',
+        title: Text('Selled Medicines',
             style: Theme.of(context).textTheme.headlineLarge),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Column(
         children: [
+          // Search TextField
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: 'Search for a medicine...',
+                hintText: 'Search Medicines',
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (value) {
@@ -70,155 +77,141 @@ class _DonatedMed_pageState extends State<DonatedMed> {
               },
             ),
           ),
+
+          // Medicines List
           Expanded(
             child: medicinesList.isEmpty
-                ? Center(
-              child: CircularProgressIndicator(),
-            )
+                ? Center(child: CircularProgressIndicator())
                 : ListView.builder(
               itemCount: medicinesList.length,
               itemBuilder: (context, index) {
                 final medicine = medicinesList[index];
                 return Card(
-                  elevation: 4,
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  margin: EdgeInsets.all(10),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(10.0),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey[200],
-                          ),
-                          child: medicine['ImagePath'] != null
-                              ? Image.asset(
-                            medicine['ImagePath']??
-                                'assets/images/placeholder.png',
-                            fit: BoxFit.cover,
-                          )
-                              : Icon(Icons.medical_services, size: 30),
+                        // Medicine Image Placeholder
+                        Image.asset(
+                          medicine['ImagePath'] ??
+                              'assets/images/placeholder.png',
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
                         ),
-                        SizedBox(width: 16),
+                        SizedBox(width: 10),
+
+                        // Medicine Details
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                medicine['MedicineName'] ?? "Unknown Medicine",
+                                '${medicine['medicine_name'] ?? "Unknown Medicine"}',
                                 style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.teal,
-                                ),
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green),
                               ),
-                              SizedBox(height: 4),
                               RichText(
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: "Manufacturer: ",
+                                      text: 'Composition: ',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold, // Bold title
-                                        color: Colors.black,
+                                        fontWeight: FontWeight
+                                            .bold, // Bold for static text
+                                        color: Colors
+                                            .black, // Add color if needed
                                       ),
                                     ),
                                     TextSpan(
-                                      text: "${medicine['Manufacturer'] ?? "Unknown"}",
+                                      text:
+                                      '${medicine['composition_mg'] ?? "Unknown"}',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.normal, // Normal content
-                                        color: Colors.grey[700],
+                                        fontWeight: FontWeight
+                                            .normal, // Regular weight for dynamic data
+                                        color: Colors
+                                            .black, // Add color if needed
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 4),
                               RichText(
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: "Expiry Date: ",
+                                      text: 'Expiry Date: ',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold, // Bold title
-                                        color: Colors.black,
-                                      ),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
                                     ),
                                     TextSpan(
-                                      text: "${medicine['ExpirationDate'] ?? "N/A"}",
+                                      text:
+                                      '${medicine['expiry_date'] ?? "N/A"}',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.normal, // Normal content
-                                        color: Colors.grey[700],
-                                      ),
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 4),
                               RichText(
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: "Donor Email: ",
+                                      text: 'Selled Price: ',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold, // Bold title
-                                        color: Colors.black,
-                                      ),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
                                     ),
                                     TextSpan(
-                                      text: "${medicine['donorEmail'] ?? "Unknown"}",
+                                      text:
+                                      '${medicine['selled_price'] ?? "Unknown"}',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.normal, // Normal content
-                                        color: Colors.grey[700],
-                                      ),
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 4),
                               RichText(
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: "Quantity: ",
+                                      text: 'Quantity: ',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold, // Bold title
-                                        color: Colors.black,
-                                      ),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
                                     ),
                                     TextSpan(
-                                      text: "${medicine['Quantity'] ?? "N/A"}",
+                                      text:
+                                      '${medicine['quantity'] ?? "N/A"}',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.normal, // Normal content
-                                        color: Colors.grey[700],
-                                      ),
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 4),
                               RichText(
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: "Strength: ",
+                                      text: 'Selled Quantity: ',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold, // Bold title
-                                        color: Colors.black,
-                                      ),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
                                     ),
                                     TextSpan(
-                                      text: "${medicine['Strength'] ?? "N/A"}",
+                                      text:
+                                      '${medicine['remaining_quantity'] ?? "N/A"}',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.normal, // Normal content
-                                        color: Colors.grey[700],
-                                      ),
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black),
                                     ),
                                   ],
                                 ),
@@ -226,6 +219,8 @@ class _DonatedMed_pageState extends State<DonatedMed> {
                             ],
                           ),
                         ),
+
+                        // Claim Button
                       ],
                     ),
                   ),

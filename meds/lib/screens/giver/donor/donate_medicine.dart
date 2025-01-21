@@ -7,6 +7,7 @@ import 'package:meds/screens/giver/donor_options_page.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:meds/screens/giver/donor/DonationConfirmationPage.dart';
 
 class DonateMedicinePage extends StatefulWidget {
   @override
@@ -71,16 +72,7 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
         throw Exception("User data not found in Firestore. Please log in again.");
       }
 
-      // Fetch the donor's donation count
-      int donationCount = 0;
-      if (donorSnapshot.data()!.containsKey('donationCount')) {
-        donationCount = donorSnapshot.data()!['donationCount'] as int;
-      }
-
-      // Increment the donation count
-      donationCount++;
-
-      // Create the medicine donation data
+            // Create the medicine donation data
       final medicineData = {
         'MedicineName': _medicineNameController.text,
         'Strength': _strengthController.text,
@@ -92,11 +84,9 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
         'DonationDate': DateTime.now().toIso8601String(),
       };
 
-      // Add the medicine data to a "Medicine" subcollection
-      await donorDocRef.collection('Medicine').doc('Dn_no_$donationCount').set(medicineData);
-
-      // Update the donation count in the main donor document
-      await donorDocRef.set({'donationCount': donationCount}, SetOptions(merge: true));
+      // Add the medicine data to the "DonateMedicines" section in Firestore
+      await donorDocRef.collection('Donated Medicine')
+          .add(medicineData); // Firestore will auto-generate the document ID
 
       // Navigate to confirmation page
       Navigator.push(
@@ -111,7 +101,6 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
       ));
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -230,58 +219,3 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
   }
 }
 
-class DonationConfirmationPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Confirmation Page",
-          style: TextStyle(
-            fontFamily: AppFonts.secondaryFont,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: AppColors.textColor,
-          ),
-        ),
-        backgroundColor: AppColors.primaryColor,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Container(
-            color: AppColors.backgroundColor,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: Container(
-                    child: Text(
-                      "Thanks For Donating to us!",
-                      style: TextStyle(
-                        fontFamily: AppFonts.secondaryFont,
-                        fontSize: 50,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textColor,
-                      ),
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => DonorOptionsPage()),
-                    );
-                  },
-                  child: Text("Back",style: TextStyle(color:Colors.white),),
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonPrimaryColor , )
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

@@ -34,6 +34,24 @@ class _SellerDashboardState extends State<SellerDashboard> {
   List<Map<String, dynamic>> filteredMedicines = [];
   TextEditingController _searchController = TextEditingController();
 
+  void initState() {
+    super.initState();
+    filteredMedicines = medicines;
+    _searchController.addListener(() {
+      filterMedicines();
+    });
+  }
+
+  void filterMedicines() {
+    setState(() {
+      filteredMedicines = medicines
+          .where((medicine) => medicine['name']
+          .toLowerCase()
+          .contains(_searchController.text.toLowerCase()))
+          .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,6 +64,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              controller: _searchController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Search Medicines',

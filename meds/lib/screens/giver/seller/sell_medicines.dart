@@ -150,7 +150,9 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
       }
       selling_count++;
 
-      await sellDocRef.collection('Medicine').doc('Sell_no_$selling_count').set(medicineData);
+      await sellDocRef.collection('Selled Medicine')
+          .add(medicineData);
+
 
       Navigator.pushReplacement(
         context,

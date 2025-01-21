@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meds/screens/Status/Donated_med.dart';
+import 'package:meds/screens/Status/Selled_med.dart';
 
 class board_selector extends StatefulWidget {
   const board_selector({super.key});
@@ -15,7 +16,8 @@ class _board_selectorState extends State<board_selector> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('See Your Activities', style: Theme.of(context).textTheme.headlineLarge),
+        title: Text('See Your Activities',
+            style: Theme.of(context).textTheme.headlineLarge),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
@@ -27,7 +29,7 @@ class _board_selectorState extends State<board_selector> {
               icon: FontAwesomeIcons.handHoldingHeart,
               onTap: () {
                 Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => DonatedMed()),
+                  MaterialPageRoute(builder: (context) => DonatedMed()),
                 );
               },
             ),
@@ -37,22 +39,22 @@ class _board_selectorState extends State<board_selector> {
               label: "Purchased Medicines",
               icon: Icons.shopping_cart,
               onTap: () {
-                print("Button 2 tapped");
+                print("Button 3 tapped");
               },
             ),
             const SizedBox(height: 16), // Spacing between buttons
 
             BoxButton(
-              label: "Selled Medicines",
-              icon: FontAwesomeIcons.moneyBillWave,
-              onTap: () {
-                print("Button 3 tapped");
-              },
-            ),
+                label: "Selled Medicines",
+                icon: FontAwesomeIcons.moneyBillWave,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => SelledMed()),
+                  );
+                }),
           ],
         ),
       ),
-
     );
   }
 }

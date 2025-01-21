@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:meds/screens/giver/Donor/donate_medicine.dart';
-import 'package:flutter/rendering.dart';
 
 class DonorDashboard extends StatefulWidget {
   @override
@@ -46,21 +45,17 @@ class _DonorDashboardState extends State<DonorDashboard> {
     setState(() {
       filteredMedicines = medicines
           .where((medicine) => medicine['name']
-              .toLowerCase()
-              .contains(_searchController.text.toLowerCase()))
+          .toLowerCase()
+          .contains(_searchController.text.toLowerCase()))
           .toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPaintSizeEnabled = true;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Hi!, User',
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
+        title: Text('Hi!, User', style: Theme.of(context).textTheme.headlineLarge),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Column(
@@ -78,8 +73,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount:
-                  filteredMedicines.length + 1, // One extra for the icon button
+              itemCount: filteredMedicines.length + 1, // One extra for the icon button
               itemBuilder: (context, index) {
                 if (index == filteredMedicines.length) {
                   // This is the icon below the list
@@ -90,73 +84,38 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         Center(
                           child: FloatingActionButton(
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DonateMedicinePage(),
-                                ),
-                              );
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>DonateMedicinePage()));
                             },
                             child: Icon(Icons.add), // Plus icon
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "Need to add new medicines to your list?",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
+                        Text(
+                          "Need to add new medicines to your list?",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          child: Text(
-                            "Simply tap the '+' button to quickly add and manage your medicine stock. "
-                            "Ensure that you regularly update expired medicines.",
-                            style: TextStyle(fontSize: 14),
-                            textAlign: TextAlign.center,
-                          ),
+                        SizedBox(height: 8),
+                        Text(
+                          "Simply tap the '+' button to quickly add and manage your medicine stock. Ensure that you regularly update expired medicines.",
+                          style: TextStyle(fontSize: 14),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
                   );
                 }
-
                 final medicine = filteredMedicines[index];
                 return Card(
-                  margin: const EdgeInsets.all(10),
+                  margin: EdgeInsets.all(10),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            color: Colors.grey[200],
-                            child: Image.asset(
-                              'assets/images/${medicine["image"]}',
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  width: 60,
-                                  height: 60,
-                                  color: Colors.grey[200],
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.broken_image,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-
-                          ),
+                        Image.asset(
+                          'assets/images/${medicine["image"]}',
+                          width: 50,
+                          height: 50,
                         ),
                         SizedBox(width: 10),
                         Expanded(
@@ -164,7 +123,7 @@ class _DonorDashboardState extends State<DonorDashboard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                medicine['name'],
+                                medicine['name']!,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
