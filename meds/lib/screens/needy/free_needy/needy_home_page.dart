@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:meds/screens/needy/free_needy/recipients_need.dart';
+import 'package:meds/screens/needy/free_needy/needy_confirmation_page.dart';
 
-class Needy_Home_page extends StatefulWidget {
+class NeedyHomePage extends StatefulWidget {
   @override
-  _Needy_Home_pageState createState() => _Needy_Home_pageState();
+  _NeedyHomePageState createState() => _NeedyHomePageState();
 }
 
-class _Needy_Home_pageState extends State<Needy_Home_page> {
+class _NeedyHomePageState extends State<NeedyHomePage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String, dynamic>> medicinesList = [];
 
@@ -17,26 +17,21 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
     fetchMedicines();
   }
 
-  // Fetch Medicines from Firestore
   Future<void> fetchMedicines() async {
     try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection('Donors_Users')
-          .get();
-
+      QuerySnapshot usersSnapshot = await _firestore.collection('users').get();
       List<Map<String, dynamic>> tempList = [];
 
-      // Loop through each donor to fetch medicines
-      for (var donorDoc in querySnapshot.docs) {
-        var medicinesCollection = await _firestore
-            .collection('Donors_Users')
-            .doc(donorDoc.id)
-            .collection('Medicine')
-            .get();
+      for (var userDoc in usersSnapshot.docs) {
+        CollectionReference donatedMedicinesRef = userDoc.reference.collection('Donated Medicine');
 
-        for (var medicineDoc in medicinesCollection.docs) {
-          Map<String, dynamic> medicineData = medicineDoc.data();
-          medicineData['donorEmail'] = donorDoc.id; // Add donor email to medicine data
+        QuerySnapshot medicinesSnapshot = await donatedMedicinesRef.get();
+
+        for (var medicineDoc in medicinesSnapshot.docs) {
+          Map<String, dynamic> medicineData = medicineDoc.data() as Map<String, dynamic>;
+
+          // Add donor email to the medicine data
+          medicineData['donorEmail'] = userDoc['email'];
           tempList.add(medicineData);
         }
       }
@@ -53,12 +48,14 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Donated Medicines', style: Theme.of(context).textTheme.headlineLarge),
+        title: Text(
+          'Donated Medicines',
+          style: Theme.of(context).textTheme.headlineLarge,
+        ),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Column(
         children: [
-          // Search TextField
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -68,12 +65,10 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (value) {
-                // Add search logic here (Optional)
+                // Add search logic if needed
               },
             ),
           ),
-
-          // Medicines List
           Expanded(
             child: medicinesList.isEmpty
                 ? Center(child: CircularProgressIndicator())
@@ -88,7 +83,6 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // Medicine Image Placeholder
                         Image.asset(
                           medicine['ImagePath'] ?? 'assets/images/placeholder.png',
                           width: 50,
@@ -96,8 +90,6 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
                           fit: BoxFit.cover,
                         ),
                         SizedBox(width: 10),
-
-                        // Medicine Details
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,26 +97,32 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
                               Text(
                                 '${medicine['MedicineName'] ?? "Unknown Medicine"}',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.green,
                                 ),
                               ),
-                              Text('Manufacturer: ${medicine['Manufacturer'] ?? "Unknown"}'),
-                              Text('Expiry Date: ${medicine['ExpirationDate'] ?? "N/A"}'),
-                              Text('Donor Email: ${medicine['donorEmail'] ?? "Unknown"}'),
-                              Text('Quantity: ${medicine['Quantity'] ?? "N/A"}'),
-                              Text('Strength: ${medicine['Strength'] ?? "N/A"}'),
+                              _buildRichText(
+                                label: 'Manufacturer: ',
+                                value: medicine['Manufacturer'] ?? "Unknown",
+                              ),
+                              _buildRichText(
+                                label: 'Expiry Date: ',
+                                value: medicine['ExpirationDate'] ?? "N/A",
+                              ),
+                              _buildRichText(
+                                label: 'Donor Email: ',
+                                value: medicine['donorEmail'] ?? "Unknown",
+                              ),
                             ],
                           ),
                         ),
-
-                        // Claim Button
                         ElevatedButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ConfirmOrderPage_Needy(),
+                                builder: (context) => OrderConfirmationPage(),
                               ),
                             );
                           },
@@ -135,6 +133,29 @@ class _Needy_Home_pageState extends State<Needy_Home_page> {
                   ),
                 );
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRichText({required String label, required String value}) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          TextSpan(
+            text: value,
+            style: TextStyle(
+              fontWeight: FontWeight.normal,
+              color: Colors.black,
             ),
           ),
         ],

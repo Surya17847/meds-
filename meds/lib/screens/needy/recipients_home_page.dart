@@ -47,7 +47,7 @@ class RecipientsHomePage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Needy_Home_page()),
+                    MaterialPageRoute(builder: (context) => NeedyHomePage()),
                   );
                 },
                 child: Text('Needy'),

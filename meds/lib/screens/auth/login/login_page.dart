@@ -8,6 +8,8 @@ import 'package:meds/utils/ui_helper/app_fonts.dart';
 import 'package:meds/screens/auth/signup/buttons.dart';
 import '../LoginWithGoogle/google_auth.dart';
 import '../PasswordForgot/forgot_password.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   static route() => MaterialPageRoute(builder: (context) => const LoginPage());
@@ -23,12 +25,63 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
+  bool isLoading = false;
+
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
   }
+  Future<void> logInWithGoogle() async {
+    try {
+      final googleSignIn = GoogleSignIn();
+
+      // Force the account chooser to appear by signing out first
+      await googleSignIn.signOut();
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // User canceled the sign-in process
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user != null) {
+        // Check if the user already exists in Firestore
+        var userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+        if (userDoc.exists) {
+          // User found, navigate to the HomeScreen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          // User does not exist, prompt to sign up
+          print("Please Sign Up First!");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("User not found in database. Please sign up first.")),
+          );
+        }
+      }
+    } catch (e) {
+      print("Google sign-in failed: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Google sign-in failed. Please try again.")),
+      );
+    }
+  }
+
 
   Future<void> loginUserWithEmailAndPassword() async {
     try {
@@ -140,30 +193,33 @@ class _LoginPageState extends State<LoginPage> {
             // Google Login Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-              child: ElevatedButton.icon(
-                icon: const FaIcon(FontAwesomeIcons.google),
+              child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, // Changed to green color for Google login
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  minimumSize: const Size(double.infinity, 50), // Increase width of the Google button
-                ),
-                onPressed: () async {
-                  await FirebaseServices().signInWithGoogle();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  );
-                },
-                label: const Text(
-                  "Continue with Google",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.white,
+                  backgroundColor: AppColors.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: logInWithGoogle,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.account_circle, color: Colors.white),
+                    SizedBox(width: 10),
+                    Text(
+                      "Log In with Google",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+
           ],
         ),
       ),
