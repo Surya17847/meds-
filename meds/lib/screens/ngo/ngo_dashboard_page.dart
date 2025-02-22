@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:meds/screens/ngo/admin/admin_dashboard_page.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
+
+// 1. Define the Authorized Admin Emails
+const List<String> authorizedAdmins = [
+  "2022.harsh.patil@ves.ac.in",
+  "harshpatil1099@gmail.com",
+  "2022.suryanarayan.panigrahy@ves.ac.in",
+  "2022.hemant.satam@ves.ac.in",
+  "2022.gaurav.gupta@ves.ac.in"
+];
+
+// 2. Check if the logged-in user is an authorized admin
+Future<bool> isAdminUser() async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null && user.email != null && authorizedAdmins.contains(user.email)) {
+    return true; // User is an admin
+  }
+  return false; // User is not authorized
+}
 
 class NGODashboardPage extends StatelessWidget {
   @override
@@ -45,18 +64,25 @@ class NGODashboardPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
 
-            // Admin Section
+            // Admin Section with email verification
             _buildRoleCard(
               context,
               title: 'Admin',
               description: 'Manage donations and view reports.',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AdminDashboardPage(),
-                  ),
-                );
+              onPressed: () async {
+                bool isAdmin = await isAdminUser();
+                if (isAdmin) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AdminDashboardPage(),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Access Denied: You are not an admin")),
+                  );
+                }
               },
             ),
             SizedBox(height: 20),
@@ -97,7 +123,12 @@ class NGODashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRoleCard(BuildContext context, {required String title, required String description, required VoidCallback onPressed}) {
+  Widget _buildRoleCard(
+      BuildContext context, {
+        required String title,
+        required String description,
+        required VoidCallback onPressed,
+      }) {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(
