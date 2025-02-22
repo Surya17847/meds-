@@ -10,7 +10,7 @@ import 'package:meds/widgets/snackbar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:country_picker/country_picker.dart';  // Add country picker package
+import 'package:country_picker/country_picker.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -27,23 +27,37 @@ class _ProfilePageState extends State<ProfilePage> {
 
   String? photoUrl;
   bool isEditing = false;
-  String countryCode = "+1"; // Default country code (e.g., for US)
+  String countryCode = "+1"; // Default country code
 
   @override
   void initState() {
     super.initState();
-    _loadProfileData();
+    _loadProfileDataFromFirestore();
   }
 
-  Future<void> _loadProfileData() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> _loadProfileDataFromFirestore() async {
+    if (user != null) {
+      final userRef = FirebaseFirestore.instance.collection('users').doc(user!.uid);
+      final snapshot = await userRef.get();
 
-    setState(() {
-      photoUrl = prefs.getString('photoUrl') ?? user?.photoURL;
-      nameController.text = prefs.getString('name') ?? user?.displayName ?? '';
-      emailController.text = prefs.getString('email') ?? user?.email ?? '';
-      phoneController.text = prefs.getString('phone') ?? '';
-    });
+      if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>;
+
+        setState(() {
+          nameController.text = data['name'] ?? '';
+          emailController.text = data['email'] ?? '';
+          phoneController.text = data['phone'] ?? '';
+          photoUrl = data['photoUrl'] ?? user!.photoURL;
+        });
+      } else {
+        // Create a new document if it doesn't exist
+        await userRef.set({
+          'email': user!.email,
+          'name': user!.displayName ?? '',
+          'photoUrl': user!.photoURL ?? '',
+        });
+      }
+    }
   }
 
   Future<void> _pickAndUploadImage() async {
@@ -61,9 +75,6 @@ class _ProfilePageState extends State<ProfilePage> {
         final userRef = FirebaseFirestore.instance.collection('users').doc(user?.uid);
         await userRef.update({'photoUrl': downloadUrl});
 
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setString('photoUrl', downloadUrl);
-
         setState(() {
           photoUrl = downloadUrl;
         });
@@ -80,14 +91,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
       await userRef.update({
         'name': nameController.text.trim(),
-        'email': emailController.text.trim(),
         'phone': '$countryCode ${phoneController.text.trim()}',
       });
-
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString('name', nameController.text.trim());
-      prefs.setString('email', emailController.text.trim());
-      prefs.setString('phone', phoneController.text.trim());
 
       setState(() {
         isEditing = false;
@@ -99,66 +104,15 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _verifyPhoneNumber(String phoneNumber) async {
-    FirebaseAuth auth = FirebaseAuth.instance;
-
-    await auth.verifyPhoneNumber(
-      phoneNumber: '$countryCode$phoneNumber', // Include country code
-      timeout: const Duration(seconds: 60),
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        await auth.signInWithCredential(credential);
-        _savePhoneNumber(phoneNumber);
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        showCustomSnackBar(context, 'Verification failed: ${e.message}', isError: true);
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        _promptForOTP(verificationId);
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
-  }
-
-  void _promptForOTP(String verificationId) {
-    TextEditingController otpController = TextEditingController();
-    showDialog(
+  void _showCountryPicker() {
+    showCountryPicker(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Enter OTP'),
-        content: TextField(controller: otpController),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final credential = PhoneAuthProvider.credential(
-                verificationId: verificationId,
-                smsCode: otpController.text.trim(),
-              );
-              try {
-                await FirebaseAuth.instance.signInWithCredential(credential);
-                _savePhoneNumber(phoneController.text.trim());
-                Navigator.pop(context);
-              } catch (e) {
-                showCustomSnackBar(context, 'Invalid OTP', isError: true);
-              }
-            },
-            child: const Text('Verify'),
-          ),
-        ],
-      ),
+      onSelect: (Country country) {
+        setState(() {
+          countryCode = "+${country.phoneCode}";
+        });
+      },
     );
-  }
-
-  Future<void> _savePhoneNumber(String phoneNumber) async {
-    final userRef = FirebaseFirestore.instance.collection('users').doc(user?.uid);
-    await userRef.update({'phone': phoneNumber});
-
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('phone', phoneNumber);
-
-    setState(() {
-      phoneController.text = phoneNumber;
-    });
-    showCustomSnackBar(context, 'Phone number verified and saved!');
   }
 
   void _showLogoutDialog() {
@@ -191,17 +145,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _showCountryPicker() {
-    showCountryPicker(
-      context: context,
-      onSelect: (Country country) {
-        setState(() {
-          countryCode = country.flagEmoji;
-        });
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -229,7 +172,6 @@ class _ProfilePageState extends State<ProfilePage> {
               enabled: isEditing,
               decoration: InputDecoration(
                 labelText: 'Name',
-                hintText: 'Enter your full name', // Hint text added
                 labelStyle: AppFonts.body,
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.primaryColor),
@@ -240,10 +182,9 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 10),
             TextField(
               controller: emailController,
-              enabled: isEditing,
+              enabled: false, // Email is not editable
               decoration: InputDecoration(
                 labelText: 'Email',
-                hintText: 'example@domain.com', // Hint text added
                 labelStyle: AppFonts.body,
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.primaryColor),
@@ -276,7 +217,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
-                      hintText: 'Enter your phone number',
                       labelStyle: AppFonts.body,
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: AppColors.primaryColor),
@@ -287,18 +227,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            if (isEditing)
-              ElevatedButton(
-                onPressed: () {
-                  _verifyPhoneNumber(phoneController.text.trim());
-                },
-                child: const Text('Verify Phone Number'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  foregroundColor: AppColors.whiteColor,
-                ),
-              ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: isEditing ? _updateProfile : () {

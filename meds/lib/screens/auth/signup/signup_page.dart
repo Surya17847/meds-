@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart'; // Import Google Sign-In
-import 'package:meds/screens/auth/login/login_page.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meds/screens/home_screen.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart'; // Import app colors
-import 'package:meds/utils/ui_helper/app_fonts.dart'; // Import app fonts
-import 'package:meds/screens/auth/signup/buttons.dart'; // Assuming MyButtons is reusable
-import 'package:meds/screens/auth/LoginWithGoogle/google_auth.dart';
+import 'package:meds/screens/auth/login/login_page.dart';
+import 'package:meds/utils/ui_helper/app_colors.dart';
+import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/screens/auth/signup/buttons.dart';
 
 class SignUpPage extends StatefulWidget {
   static route() => MaterialPageRoute(
@@ -30,29 +30,91 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
+  // Google Sign-Up
   Future<void> signUpWithGoogle() async {
-    await FirebaseServices().signInWithGoogle(); // Trigger Google account selection
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()), // Navigate to login page after successful sign-up
-    );
+    try {
+      final googleSignIn = GoogleSignIn();
+
+      // Force the account chooser to appear by signing out first
+      await googleSignIn.signOut();
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // User canceled the sign-in process
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user != null) {
+        // Save user data to Firestore
+        await saveUserData(user);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      print("Google sign-up failed: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Google sign-up failed. Please try again.")),
+      );
+    }
   }
 
+  // Email Sign-Up
   Future<void> createUserWithEmailAndPassword() async {
-    try {
-      final userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-      print(userCredential);
-      print(userCredential.user?.uid);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-    } on FirebaseAuthException catch (e) {
-      print(e.message);
+    if (formKey.currentState!.validate()) {
+      try {
+        final userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+        final user = userCredential.user;
+
+        if (user != null) {
+          // Save user data to Firestore
+          await saveUserData(user);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        print(e.message);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? "An error occurred.")),
+        );
+      }
+    }
+  }
+
+  // Save user data to Firestore
+  Future<void> saveUserData(User user) async {
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+    final userDoc = usersCollection.doc(user.uid);
+
+    // Check if the user document exists
+    final docSnapshot = await userDoc.get();
+
+    if (!docSnapshot.exists) {
+      // If the document doesn't exist, create a new one
+      await userDoc.set({
+        'uid': user.uid,
+        'email': user.email,
+        'name': user.displayName ?? 'No Name',
+        'photoURL': user.photoURL ?? '',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
     }
   }
 
@@ -67,60 +129,58 @@ class _SignUpPageState extends State<SignUpPage> {
         backgroundColor: AppColors.primaryColor,
         centerTitle: true,
       ),
-      body: SingleChildScrollView( // Prevent overflow by allowing scrolling
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(15.0),
         child: Form(
           key: formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 50), // Padding from the top
-
-              // Logo image
-              Image.asset(
-                'assets/images/meds_icon.png', // Make sure you have this image
-                height: 100,
-                width: 100,
-              ),
+              const SizedBox(height: 50),
+              Image.asset('assets/images/meds_icon.png', height: 100, width: 100),
               const SizedBox(height: 20),
-
-              // Email Input Field
               TextFormField(
                 controller: emailController,
                 decoration: InputDecoration(
                   hintText: 'Email',
-                  hintStyle: TextStyle(color: Colors.black), // Text hint color set to black
                   border: const OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: AppColors.primaryColor),
                   ),
                 ),
-                style: AppFonts.body.copyWith(color: Colors.black), // Text color set to black
+                style: AppFonts.body.copyWith(color: Colors.black),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an email address';
+                  } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 15),
-
-              // Password Input Field
               TextFormField(
                 controller: passwordController,
                 decoration: InputDecoration(
                   hintText: 'Password',
-                  hintStyle: TextStyle(color: Colors.black), // Text hint color set to black
                   border: const OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: AppColors.primaryColor),
                   ),
                 ),
                 obscureText: true,
-                style: AppFonts.body.copyWith(color: Colors.black), // Text color set to black
+                style: AppFonts.body.copyWith(color: Colors.black),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a password';
+                  } else if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
-
-              // Sign Up Button
               MyButtons(onTap: createUserWithEmailAndPassword, text: "Sign Up"),
-
               const SizedBox(height: 20),
-
-              // Link to login page if already have an account
               GestureDetector(
                 onTap: () {
                   Navigator.push(context, LoginPage.route());
@@ -128,9 +188,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: RichText(
                   text: TextSpan(
                     text: 'Already have an account? ',
-                    style: AppFonts.body.copyWith(
-                      color: AppColors.textColor,
-                    ),
+                    style: AppFonts.body.copyWith(color: AppColors.textColor),
                     children: [
                       TextSpan(
                         text: 'Log In',
@@ -143,21 +201,18 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 30),
-
-              // Google sign-up button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor, // Use custom primary color
+                    backgroundColor: AppColors.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  onPressed: signUpWithGoogle, // Trigger Google Sign-In
+                  onPressed: signUpWithGoogle,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [

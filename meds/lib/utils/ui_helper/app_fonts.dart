@@ -24,4 +24,10 @@ class AppFonts {
     fontSize: 16,
     color: Colors.white, // Default button text color
   );
+
+  static const TextStyle headlineLarge = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Colors.black, // Replace with desired color
+  );
 }

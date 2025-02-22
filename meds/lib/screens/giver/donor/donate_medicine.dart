@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meds/screens/giver/donor_options_page.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:meds/screens/giver/donor/DonationConfirmationPage.dart';
 
 class DonateMedicinePage extends StatefulWidget {
   @override
@@ -53,21 +55,24 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
   // Submit donation to Firestore
   Future<void> _submitDonation() async {
     try {
+      // Initialize Firestore
       final firestore = FirebaseFirestore.instance;
-      final donorDocRef = firestore.collection('Donors_Users').doc('harshpatil@gmail.com');
+
+      // Fetch the logged-in user's UID
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception("User is not logged in. Please log in to proceed.");
+      }
+
+      // Reference the user's document in Firestore using their UID
+      final donorDocRef = firestore.collection('users').doc(user.uid);
       final donorSnapshot = await donorDocRef.get();
 
       if (!donorSnapshot.exists) {
-        throw Exception("Donor data not found in Firestore. Please log in again.");
+        throw Exception("User data not found in Firestore. Please log in again.");
       }
 
-      int donationCount = 0;
-      if (donorSnapshot.data()!.containsKey('donationCount')) {
-        donationCount = donorSnapshot.data()!['donationCount'] as int;
-      }
-
-      donationCount++;
-
+            // Create the medicine donation data
       final medicineData = {
         'MedicineName': _medicineNameController.text,
         'Strength': _strengthController.text,
@@ -79,17 +84,20 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
         'DonationDate': DateTime.now().toIso8601String(),
       };
 
-      await donorDocRef.collection('Medicine').doc('Dn_no_$donationCount').set(medicineData);
-      await donorDocRef.set({'donationCount': donationCount}, SetOptions(merge: true));
+      // Add the medicine data to the "DonateMedicines" section in Firestore
+      await donorDocRef.collection('Donated Medicine')
+          .add(medicineData); // Firestore will auto-generate the document ID
 
+      // Navigate to confirmation page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => DonationConfirmationPage()),
       );
     } catch (e) {
+      // Show error message in a SnackBar
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Error: ${e.toString()}"),
-        backgroundColor: AppColors.errorColor,
+        backgroundColor: Colors.red,
       ));
     }
   }
@@ -211,58 +219,3 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
   }
 }
 
-class DonationConfirmationPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Confirmation Page",
-          style: TextStyle(
-            fontFamily: AppFonts.secondaryFont,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: AppColors.textColor,
-          ),
-        ),
-        backgroundColor: AppColors.primaryColor,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Container(
-            color: AppColors.backgroundColor,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: Container(
-                    child: Text(
-                      "Thanks For Donating to us!",
-                      style: TextStyle(
-                        fontFamily: AppFonts.secondaryFont,
-                        fontSize: 50,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textColor,
-                      ),
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => DonorOptionsPage()),
-                    );
-                  },
-                  child: Text("Back"),
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonPrimaryColor),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
