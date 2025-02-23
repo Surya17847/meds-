@@ -14,43 +14,52 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
     super.initState();
+    
+    // Animation setup
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+    
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+
+    _animationController.forward();
+    
     _navigateAfterSplash();
   }
 
   Future<void> _navigateAfterSplash() async {
-    // Show splash for 2 seconds
     await Future.delayed(const Duration(seconds: 2));
 
-    // Get current user
     User? user = FirebaseAuth.instance.currentUser;
-
-    // Access SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? hasSeenInstructions = prefs.getBool('hasSeenInstructions') ?? false;
     bool? isLoggedOut = prefs.getBool('isLoggedOut') ?? false;
 
     if (user != null && !isLoggedOut) {
-      // User is logged in and not logged out explicitly
       if (hasSeenInstructions) {
-        // Navigate to HomeScreen if instructions are already seen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       } else {
-        // Navigate to InstructionSlider if instructions haven't been seen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const InstructionSlider()),
         );
       }
     } else {
-      // If user is not logged in or explicitly logged out, show instructions
-      prefs.remove('isLoggedOut'); // Clear logout status
+      prefs.remove('isLoggedOut');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const InstructionSlider()),
@@ -61,39 +70,70 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: AppColors.primaryColor,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/images/meds_start.png',
-                height: 120,
-                width: 120,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Gradient Background
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primaryColor, AppColors.secondaryColor],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(height: 20),
-              Text(
-                "MEDS",
-                style: AppFonts.heading.copyWith(
-                  fontSize: 36,
-                  color: AppColors.whiteColor,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Medicine Exchange and Distribution System",
-                style: AppFonts.body.copyWith(
-                  fontSize: 16,
-                  color: AppColors.whiteColor.withOpacity(0.9),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+            ),
           ),
-        ),
+          
+          // Centered Content
+          Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/images/meds_start.png',
+                    height: 120,
+                    width: 120,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "MEDS",
+                    style: AppFonts.heading.copyWith(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.whiteColor,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Medicine Exchange and Distribution System",
+                    style: AppFonts.body.copyWith(
+                      fontSize: 16,
+                      color: AppColors.whiteColor.withValues(),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
+                  
+                  // Loading Indicator
+                  const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    strokeWidth: 2.5,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }
 
