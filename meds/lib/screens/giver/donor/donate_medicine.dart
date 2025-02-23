@@ -72,7 +72,7 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
         throw Exception("User data not found in Firestore. Please log in again.");
       }
 
-            // Create the medicine donation data
+      // Create the medicine donation data
       final medicineData = {
         'MedicineName': _medicineNameController.text,
         'Strength': _strengthController.text,
@@ -85,13 +85,14 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
       };
 
       // Add the medicine data to the "DonateMedicines" section in Firestore
-      await donorDocRef.collection('Donated Medicine')
-          .add(medicineData); // Firestore will auto-generate the document ID
+      await donorDocRef.collection('Donated Medicine').add(medicineData); // Firestore will auto-generate the document ID
 
-      // Navigate to confirmation page
+      // Pass the medicine data to the DonationConfirmationPage
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => DonationConfirmationPage()),
+        MaterialPageRoute(
+          builder: (context) => DonationConfirmationPage(medicine: medicineData),
+        ),
       );
     } catch (e) {
       // Show error message in a SnackBar

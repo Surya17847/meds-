@@ -7,7 +7,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
 import 'package:meds/widgets/snackbar.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:country_picker/country_picker.dart';

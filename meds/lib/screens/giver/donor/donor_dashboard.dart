@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meds/screens/giver/Donor/donate_medicine.dart';
+import 'package:meds/screens/ngo/admin/all_requested_medicine.dart';
+import 'donation_request.dart'; // Import DonationRequestPage
 
 class DonorDashboard extends StatefulWidget {
   @override
@@ -57,6 +59,17 @@ class _DonorDashboardState extends State<DonorDashboard> {
       appBar: AppBar(
         title: Text('Hi!, User', style: Theme.of(context).textTheme.headlineLarge),
         backgroundColor: Theme.of(context).colorScheme.primary,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.list),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AllRequestedMedicinesPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

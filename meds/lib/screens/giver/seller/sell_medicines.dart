@@ -118,6 +118,19 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
       print('Error: $e');
     }
   }
+  void _pickExpirationDate() async {
+    DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (selectedDate != null) {
+      setState(() {
+        _dateController.text = "${selectedDate.toLocal()}".split(' ')[0]; // format: yyyy-mm-dd
+      });
+    }
+  }
 
   Future<void> _sellMedicine() async {
     try {
@@ -240,10 +253,20 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
                 decoration: InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
               ),
-              TextFormField(
+              TextField(
                 controller: _dateController,
-                decoration: InputDecoration(labelText: 'Expiry Date (yyyy-mm-dd)'),
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'Expiry Date (yyyy-mm-dd)',
+                  labelStyle: TextStyle(fontFamily: AppFonts.primaryFont, color: AppColors.textColor),
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.calendar_today, color: AppColors.iconColor),
+                    onPressed: _pickExpirationDate,
+                  ),
+                ),
               ),
+
               TextFormField(
                 controller: _predictedPriceController,
                 decoration: InputDecoration(labelText: 'Predicted Price'),

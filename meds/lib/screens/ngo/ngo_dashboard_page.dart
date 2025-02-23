@@ -4,6 +4,8 @@ import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:meds/screens/ngo/admin/admin_dashboard_page.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/screens/ngo/pharmacist/pharmacist_dashboard.dart';  // Import the Pharmacist Dashboard page
+import 'package:meds/screens/ngo/deliverer/deliverer_dashboard.dart';  // Import the Deliverer Dashboard page
 
 // 1. Define the Authorized Admin Emails
 const List<String> authorizedAdmins = [
@@ -103,18 +105,25 @@ class NGODashboardPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
 
-            // Pharmacist Section
+            // Pharmacist Section with admin access check
             _buildRoleCard(
               context,
               title: 'Pharmacist',
               description: 'Manage donated medicines and stock.',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PharmacistDashboard(),
-                  ),
-                );
+              onPressed: () async {
+                bool isAdmin = await isAdminUser();
+                if (isAdmin) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PharmacistDashboard(),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Access Denied: You are not authorized")),
+                  );
+                }
               },
             ),
           ],
@@ -146,70 +155,6 @@ class NGODashboardPage extends StatelessWidget {
         ),
         trailing: Icon(Icons.arrow_forward, color: AppColors.secondaryColor),
         onTap: onPressed,
-      ),
-    );
-  }
-}
-
-// Placeholder Pages for Admin, Deliverer, and Pharmacist Dashboards
-class AdminDashboard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Admin Dashboard',
-          style: AppFonts.heading.copyWith(color: AppColors.whiteColor),
-        ),
-        backgroundColor: AppColors.primaryColor,
-      ),
-      body: Center(
-        child: Text(
-          'Admin functionalities will be implemented here',
-          style: AppFonts.body.copyWith(color: AppColors.textColor),
-        ),
-      ),
-    );
-  }
-}
-
-class DelivererDashboard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Deliverer Dashboard',
-          style: AppFonts.heading.copyWith(color: AppColors.whiteColor),
-        ),
-        backgroundColor: AppColors.primaryColor,
-      ),
-      body: Center(
-        child: Text(
-          'Deliverer functionalities will be implemented here',
-          style: AppFonts.body.copyWith(color: AppColors.textColor),
-        ),
-      ),
-    );
-  }
-}
-
-class PharmacistDashboard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Pharmacist Dashboard',
-          style: AppFonts.heading.copyWith(color: AppColors.whiteColor),
-        ),
-        backgroundColor: AppColors.primaryColor,
-      ),
-      body: Center(
-        child: Text(
-          'Pharmacist functionalities will be implemented here',
-          style: AppFonts.body.copyWith(color: AppColors.textColor),
-        ),
       ),
     );
   }

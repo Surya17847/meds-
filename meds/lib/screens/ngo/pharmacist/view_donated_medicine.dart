@@ -124,7 +124,7 @@ class _ViewDonatedMedicinesPageState extends State<ViewDonatedMedicinesPage> {
           // -- List of fetched (and filtered) medicines --
           Expanded(
             child: _filteredMedicines.isEmpty
-                ? Center(child: Text('Loading donated Medicines...'))
+                ? Center(child: Text('Loading medicines...'))
                 : ListView.builder(
               itemCount: _filteredMedicines.length,
               itemBuilder: (context, index) {
@@ -197,49 +197,48 @@ class _ViewDonatedMedicinesPageState extends State<ViewDonatedMedicinesPage> {
                               ),
                               SizedBox(height: 10),
 
-                              // -- Approve / Reject Buttons --
-                              // ElevatedButton(
-                              //   onPressed: () {
-                              //     Navigator.push(
-                              //       context,
-                              //       MaterialPageRoute(
-                              //         builder: (context) => NGOActionConfirmationPage(isApproved: true),
-                              //       ),
-                              //     );
-                              //   },
-                              //   style: ElevatedButton.styleFrom(
-                              //     backgroundColor: AppColors.buttonPrimaryColor,
-                              //   ),
-                              //   child: Text(
-                              //     'Approve',
-                              //     style: TextStyle(
-                              //       fontFamily: AppFonts.secondaryFont,
-                              //       fontSize: 16,
-                              //       color: AppColors.buttonTextColor,
-                              //     ),
-                              //   ),
-                              // ),
-                              // ElevatedButton(
-                              //   onPressed: () {
-                              //     Navigator.push(
-                              //       context,
-                              //       MaterialPageRoute(
-                              //         builder: (context) => NGOActionConfirmationPage(isApproved: false),
-                              //       ),
-                              //     );
-                              //   },
-                              //   style: ElevatedButton.styleFrom(
-                              //     backgroundColor: AppColors.buttonSecondaryColor,
-                              //   ),
-                              //   child: Text(
-                              //     'Reject',
-                              //     style: TextStyle(
-                              //       fontFamily: AppFonts.secondaryFont,
-                              //       fontSize: 16,
-                              //       color: AppColors.buttonTextColor,
-                              //     ),
-                              //   ),
-                              // ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => NGOActionConfirmationPage(isApproved: true),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.buttonPrimaryColor,
+                                ),
+                                child: Text(
+                                  'Approve',
+                                  style: TextStyle(
+                                    fontFamily: AppFonts.secondaryFont,
+                                    fontSize: 16,
+                                    color: AppColors.buttonTextColor,
+                                  ),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => NGOActionConfirmationPage(isApproved: false),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.buttonSecondaryColor,
+                                ),
+                                child: Text(
+                                  'Reject',
+                                  style: TextStyle(
+                                    fontFamily: AppFonts.secondaryFont,
+                                    fontSize: 16,
+                                    color: AppColors.buttonTextColor,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
