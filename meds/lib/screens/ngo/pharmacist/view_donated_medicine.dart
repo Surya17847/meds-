@@ -1,86 +1,148 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // <-- Firestore import
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meds/screens/ngo/admin/approval_confirmation_page.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ViewDonatedMedicinesPage extends StatefulWidget {
   @override
-  State<ViewDonatedMedicinesPage> createState() => _ViewDonatedMedicinesPageState();
+  State<ViewDonatedMedicinesPage> createState() =>
+      _ViewDonatedMedicinesPageState();
 }
 
 class _ViewDonatedMedicinesPageState extends State<ViewDonatedMedicinesPage> {
-  // Firestore instance
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  // Text controller for searching
   final TextEditingController _searchController = TextEditingController();
 
-  // Lists to hold fetched medicines
   List<Map<String, dynamic>> _allMedicines = [];
   List<Map<String, dynamic>> _filteredMedicines = [];
 
   @override
   void initState() {
     super.initState();
-    // Fetch medicines once the widget is initialized
     fetchMedicines();
   }
 
-  /// Fetches all user docs from "users" collection, then gets
-  /// each user's "Donated Medicine" subcollection documents.
+  /// Fetches all donated medicines from each user’s “Donated Medicine” subcollection.
   Future<void> fetchMedicines() async {
     try {
-      // 1. Get all documents from 'users' collection
       QuerySnapshot usersSnapshot = await _firestore.collection('users').get();
-
       List<Map<String, dynamic>> tempList = [];
 
-      // 2. For each user document, get the "Donated Medicine" subcollection
       for (var userDoc in usersSnapshot.docs) {
-        // Access the subcollection reference
         CollectionReference donatedMedicinesRef =
         userDoc.reference.collection('Donated Medicine');
-
-        // 3. Get all documents from "Donated Medicine"
         QuerySnapshot medicinesSnapshot = await donatedMedicinesRef.get();
 
-        // 4. For each donated medicine document, add it to our tempList
         for (var medicineDoc in medicinesSnapshot.docs) {
           Map<String, dynamic> medicineData =
           medicineDoc.data() as Map<String, dynamic>;
 
-          // Optionally, you can also store user info or doc IDs
-          // e.g., medicineData['userId'] = userDoc.id;
-          // e.g., medicineData['medicineDocId'] = medicineDoc.id;
+          // Save donor info so we can later delete the doc
+          // and also map it to the same doc in "Pharmacists".
+          medicineData['userId'] = userDoc.id;
+          medicineData['medicineDocId'] = medicineDoc.id;
 
           tempList.add(medicineData);
         }
       }
 
-      // Update state with the fetched medicines
       setState(() {
         _allMedicines = tempList;
-        _filteredMedicines = tempList; // initially show all
+        _filteredMedicines = tempList; // Initially display all
       });
     } catch (e) {
       print('Error fetching medicines: $e');
-      // Handle error (e.g., show a Snackbar or error message)
     }
   }
 
   /// Filters the medicines based on the search query.
   void _searchMedicines(String query) {
     final lowerQuery = query.toLowerCase();
-
     setState(() {
       _filteredMedicines = _allMedicines.where((medicine) {
-        // Adjust field name to match your Firestore doc field (e.g. 'MedicineName')
         final name = (medicine['MedicineName'] ?? '').toLowerCase();
         return name.contains(lowerQuery);
       }).toList();
     });
   }
+
+  /// Handles the approval process:
+  /// 1. Adds the medicine to "Approved Medicine" under "Pharmacists/userId".
+  /// 2. Deletes the medicine from the donor's "Donated Medicine".
+  Future<void> _approveMedicine(Map<String, dynamic> medicine) async {
+    final String donorId = medicine['userId']; // Donor's ID
+    final String medicineDocId = medicine['medicineDocId'];
+    final String pharmacistId = FirebaseAuth.instance.currentUser!.uid; // Pharmacist's ID
+
+    try {
+      // Ensure pharmacist document exists before adding subcollection
+      await _firestore.collection('Pharmacists').doc(pharmacistId).set({
+        'role': 'pharmacist', // You can add other fields if needed
+      }, SetOptions(merge: true));
+
+      // Add to pharmacist's Approved Medicine subcollection
+      await _firestore
+          .collection('Pharmacists')
+          .doc(pharmacistId)
+          .collection('Approved Medicine')
+          .doc(medicineDocId)
+          .set(medicine);
+
+      // Delete from Donated Medicine subcollection
+      await _firestore
+          .collection('users')
+          .doc(donorId)
+          .collection('Donated Medicine')
+          .doc(medicineDocId)
+          .delete();
+
+      // Refresh the UI after approval
+      fetchMedicines();
+    } catch (e) {
+      print('Error approving medicine: $e');
+    }
+  }
+
+
+  /// Handles the rejection process:
+  /// 1. Adds the medicine to "Rejected Medicine" under "Pharmacists/userId".
+  /// 2. Deletes the medicine from the donor's "Donated Medicine".
+  Future<void> _rejectMedicine(Map<String, dynamic> medicine) async {
+    final String donorId = medicine['userId'];
+    final String medicineDocId = medicine['medicineDocId'];
+    final String pharmacistId = FirebaseAuth.instance.currentUser!.uid;
+
+    try {
+      // Ensure pharmacist document exists before adding subcollection
+      await _firestore.collection('Pharmacists').doc(pharmacistId).set({
+        'role': 'pharmacist',
+      }, SetOptions(merge: true));
+
+      // Add to pharmacist's Rejected Medicine subcollection
+      await _firestore
+          .collection('Pharmacists')
+          .doc(pharmacistId)
+          .collection('Rejected Medicine')
+          .doc(medicineDocId)
+          .set(medicine);
+
+      // Delete from Donated Medicine subcollection
+      await _firestore
+          .collection('users')
+          .doc(donorId)
+          .collection('Donated Medicine')
+          .doc(medicineDocId)
+          .delete();
+
+      // Refresh the UI after rejection
+      fetchMedicines();
+    } catch (e) {
+      print('Error rejecting medicine: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +161,7 @@ class _ViewDonatedMedicinesPageState extends State<ViewDonatedMedicinesPage> {
       ),
       body: Column(
         children: [
-          // -- Search bar at the top --
+          // -- Search bar --
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -115,12 +177,10 @@ class _ViewDonatedMedicinesPageState extends State<ViewDonatedMedicinesPage> {
                 prefixIcon: Icon(Icons.search, color: AppColors.iconColor),
               ),
               onChanged: (value) {
-                // Filter medicines as user types
                 _searchMedicines(value);
               },
             ),
           ),
-
           // -- List of fetched (and filtered) medicines --
           Expanded(
             child: _filteredMedicines.isEmpty
@@ -129,13 +189,14 @@ class _ViewDonatedMedicinesPageState extends State<ViewDonatedMedicinesPage> {
               itemCount: _filteredMedicines.length,
               itemBuilder: (context, index) {
                 final medicine = _filteredMedicines[index];
-
-                // Adjust field names to match your Firestore fields
                 final name = medicine['MedicineName'] ?? 'Unknown Medicine';
-                final manufacturer = medicine['Manufacturer'] ?? 'Unknown Manufacturer';
-                final expiryDate = medicine['ExpirationDate'] ?? 'No Expiry Date';
+                final manufacturer =
+                    medicine['Manufacturer'] ?? 'Unknown Manufacturer';
+                final expiryDate =
+                    medicine['ExpirationDate'] ?? 'No Expiry Date';
                 final price = medicine['Price'] ?? 'N/A';
-                final imagePath = medicine['ImagePath'] ?? 'default_image.jpg';
+                final imagePath =
+                    medicine['ImagePath'] ?? 'default_image.jpg';
 
                 return Card(
                   margin: EdgeInsets.all(10),
@@ -145,19 +206,17 @@ class _ViewDonatedMedicinesPageState extends State<ViewDonatedMedicinesPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // If you're storing image paths in Firestore for local assets:
+                        // Display medicine image.
                         Image.asset(
                           'assets/images/$imagePath',
                           width: 50,
                           height: 50,
                           errorBuilder: (context, error, stackTrace) {
-                            // Fallback icon if the asset isn't found
                             return Icon(Icons.medical_services, size: 50);
                           },
                         ),
                         SizedBox(width: 10),
-
-                        // -- Medicine Info --
+                        // Medicine information.
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,48 +255,71 @@ class _ViewDonatedMedicinesPageState extends State<ViewDonatedMedicinesPage> {
                                 ),
                               ),
                               SizedBox(height: 10),
-
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => NGOActionConfirmationPage(isApproved: true),
+                              // Approve and Reject buttons.
+                              Row(
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      await _approveMedicine(medicine);
+                                      // Remove the item from the list after successful approval.
+                                      setState(() {
+                                        _allMedicines.removeAt(index);
+                                        _filteredMedicines.removeAt(index);
+                                      });
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              NGOActionConfirmationPage(
+                                                  isApproved: true),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                      AppColors.buttonPrimaryColor,
                                     ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.buttonPrimaryColor,
-                                ),
-                                child: Text(
-                                  'Approve',
-                                  style: TextStyle(
-                                    fontFamily: AppFonts.secondaryFont,
-                                    fontSize: 16,
-                                    color: AppColors.buttonTextColor,
-                                  ),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => NGOActionConfirmationPage(isApproved: false),
+                                    child: Text(
+                                      'Approve',
+                                      style: TextStyle(
+                                        fontFamily: AppFonts.secondaryFont,
+                                        fontSize: 16,
+                                        color: AppColors.buttonTextColor,
+                                      ),
                                     ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.buttonSecondaryColor,
-                                ),
-                                child: Text(
-                                  'Reject',
-                                  style: TextStyle(
-                                    fontFamily: AppFonts.secondaryFont,
-                                    fontSize: 16,
-                                    color: AppColors.buttonTextColor,
                                   ),
-                                ),
+                                  SizedBox(width: 10),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      await _rejectMedicine(medicine);
+                                      // Remove the item from the list after rejection.
+                                      setState(() {
+                                        _allMedicines.removeAt(index);
+                                        _filteredMedicines.removeAt(index);
+                                      });
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              NGOActionConfirmationPage(
+                                                  isApproved: false),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                      AppColors.buttonSecondaryColor,
+                                    ),
+                                    child: Text(
+                                      'Reject',
+                                      style: TextStyle(
+                                        fontFamily: AppFonts.secondaryFont,
+                                        fontSize: 16,
+                                        color: AppColors.buttonTextColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
