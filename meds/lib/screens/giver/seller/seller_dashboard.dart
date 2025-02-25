@@ -56,7 +56,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hi!, User', style: Theme.of(context).textTheme.headlineLarge),
+        title: Text('Hi!, User', style: AppFonts.headlineLarge),
         backgroundColor: AppColors.primaryColor, // Use color from app_colors.dart
       ),
       body: Column(

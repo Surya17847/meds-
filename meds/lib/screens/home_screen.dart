@@ -90,7 +90,7 @@ class HomeScreen extends StatelessWidget {
             ),
             // Main Card for Giver, Donor, and NGO (1 in a row)
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(18.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -219,26 +219,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20), // Extra spacing before button
             // Button for Instruction Slider
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to Instruction Slider page
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const InstructionSlider()),
-                  );
-                },
-                child: const Text('Instruction Slider'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 30.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20), // Extra spacing for better layout
+             // Extra spacing for better layout
           ],
         ),
       ),

@@ -247,6 +247,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 backgroundColor: AppColors.secondaryColor,
                 foregroundColor: AppColors.whiteColor,
               ),
+
             ),
           ],
         ),

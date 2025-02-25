@@ -9,7 +9,7 @@ class AppColors {
   static const Color backgroundColor = Colors.white; // White for backgrounds and cards
   static const Color whiteColor = Colors.white; // Text Wherever there is Green Background
   static const Color lightGrey = Color(0xFFD3D3D3); // Replace with your desired color code
-  static const Color primary = Color(0xFF6200EA);
+  static const Color primary = Color.fromRGBO(122, 220, 125, 1);
 
   // New Button Colors
   static const Color buttonPrimaryColor = Color.fromRGBO(56, 142, 60, 1); // Primary green button

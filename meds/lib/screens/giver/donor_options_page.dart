@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:meds/screens/giver/donor/donor_dashboard.dart';
 import 'package:meds/screens/giver/seller/seller_dashboard.dart';
-
+import 'package:meds/utils/ui_helper/app_colors.dart';
+import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 class DonorOptionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Give medicines', style: Theme.of(context).textTheme.headlineLarge),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text('Give medicines', style: AppFonts.headlineLarge),
+        backgroundColor: AppColors.primaryColor,
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
