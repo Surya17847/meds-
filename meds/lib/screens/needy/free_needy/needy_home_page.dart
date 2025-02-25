@@ -19,19 +19,30 @@ class _NeedyHomePageState extends State<NeedyHomePage> {
 
   Future<void> fetchMedicines() async {
     try {
-      QuerySnapshot usersSnapshot = await _firestore.collection('users').get();
+      // Get all pharmacist documents.
+      QuerySnapshot pharmacistsSnapshot =
+      await _firestore.collection('Pharmacists').get();
       List<Map<String, dynamic>> tempList = [];
 
-      for (var userDoc in usersSnapshot.docs) {
-        CollectionReference donatedMedicinesRef = userDoc.reference.collection('Donated Medicine');
+      // For each pharmacist, get medicines in their "Approved Medicine" subcollection.
+      for (var pharmacistDoc in pharmacistsSnapshot.docs) {
+        // Use a try/catch or check if the email field exists.
+        String donorEmail = pharmacistDoc.data().toString().contains('email')
+            ? pharmacistDoc.get('email')
+            : 'No email';
 
-        QuerySnapshot medicinesSnapshot = await donatedMedicinesRef.get();
+        CollectionReference approvedMedicinesRef =
+        pharmacistDoc.reference.collection('Approved Medicine');
+
+        QuerySnapshot medicinesSnapshot =
+        await approvedMedicinesRef.get();
 
         for (var medicineDoc in medicinesSnapshot.docs) {
-          Map<String, dynamic> medicineData = medicineDoc.data() as Map<String, dynamic>;
+          Map<String, dynamic> medicineData =
+          medicineDoc.data() as Map<String, dynamic>;
 
-          // Add donor email to the medicine data
-          medicineData['donorEmail'] = userDoc['email'];
+          // Add the pharmacist's email as donorEmail to the medicine data.
+          medicineData['donorEmail'] = donorEmail;
           tempList.add(medicineData);
         }
       }
@@ -43,7 +54,6 @@ class _NeedyHomePageState extends State<NeedyHomePage> {
       print("Error fetching medicines: $e");
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
