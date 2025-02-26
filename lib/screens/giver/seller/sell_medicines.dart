@@ -5,16 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:meds/screens/giver/donor_options_page.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart';
-import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/screens/giver/donor/donor_options_page.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MaterialApp(home: SellMedicinePage()));
+  runApp(MaterialApp(
+    home: SellMedicinePage(),
+    theme: AppTheme.lightTheme,
+  ));
 }
 
 class SellMedicinePage extends StatefulWidget {
@@ -61,7 +62,8 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
     "Paroxetine", "Nortriptyline", "Duloxetine", "Ceritinib", "Vardenafil",
     "Fexofenadine", "Montelukast", "Gliclazide", "Amlodipine besyl", "Glyboral",
     "Glimepride", "Niacin", "Alphadopa", "Toradol", "Cilnidipine", "Perindopril",
-    "Satalol", "Katadol", "Teniva"  ];
+    "Satalol", "Katadol", "Teniva"
+  ];
 
   @override
   void initState() {
@@ -118,6 +120,20 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
       print('Error: $e');
     }
   }
+  
+  void _pickExpirationDate() async {
+    DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (selectedDate != null) {
+      setState(() {
+        _dateController.text = "${selectedDate.toLocal()}".split(' ')[0]; // format: yyyy-mm-dd
+      });
+    }
+  }
 
   Future<void> _sellMedicine() async {
     try {
@@ -133,26 +149,24 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
       };
 
       final firestore = FirebaseFirestore.instance;
-      final user=FirebaseAuth.instance.currentUser;
+      final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception("User is not logged in. Please log in to proceed.");
       }
 
-      final sellDocRef=firestore.collection('users').doc(user.uid);
-      final SellSnapshot=await sellDocRef.get();
-      if(!SellSnapshot.exists){
+      final sellDocRef = firestore.collection('users').doc(user.uid);
+      final SellSnapshot = await sellDocRef.get();
+      if (!SellSnapshot.exists) {
         throw Exception("User data not found in Firestore. Please log in again.");
       }
 
-      int selling_count=0;
+      int selling_count = 0;
       if (SellSnapshot.data()!.containsKey('SellingCount')) {
         selling_count = SellSnapshot.data()!['SellingCount'] as int;
       }
       selling_count++;
 
-      await sellDocRef.collection('Selled Medicine')
-          .add(medicineData);
-
+      await sellDocRef.collection('Selled Medicine').add(medicineData);
 
       Navigator.pushReplacement(
         context,
@@ -170,7 +184,8 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sell Medicine'),
+        title: Text('Sell Medicine', style: AppFonts.headline),
+        backgroundColor: AppColors.primaryColor,
         actions: [
           IconButton(
             icon: Icon(Icons.arrow_back),
@@ -193,26 +208,26 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
                 onTap: _pickImage,
                 child: medicineImage == null
                     ? Container(
-                  width: double.infinity,
-                  height: 150,
-                  color: AppColors.lightGrey,
-                  child: Icon(Icons.add_a_photo, size: 50, color: AppColors.primary),
-                )
+                        width: double.infinity,
+                        height: 150,
+                        color: AppColors.lightGrey,
+                        child: Icon(Icons.add_a_photo, size: 50, color: AppColors.primaryColor),
+                      )
                     : Image.file(
-                  File(medicineImage!),
-                  width: double.infinity,
-                  height: 150,
-                  fit: BoxFit.cover,
-                ),
+                        File(medicineImage!),
+                        width: double.infinity,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      ),
               ),
               SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(labelText: 'Medicine Name'),
                 items: medicines
                     .map((medicine) => DropdownMenuItem<String>(
-                  value: medicine,
-                  child: Text(medicine),
-                ))
+                          value: medicine,
+                          child: Text(medicine, style: AppFonts.body),
+                        ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -220,43 +235,69 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
                   });
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _compositionMgController,
                 decoration: InputDecoration(labelText: 'Composition (mg)'),
                 keyboardType: TextInputType.number,
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _quantityController,
                 decoration: InputDecoration(labelText: 'Quantity'),
                 keyboardType: TextInputType.number,
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _remainingQuantityController,
                 decoration: InputDecoration(labelText: 'Remaining Quantity'),
                 keyboardType: TextInputType.number,
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _priceController,
                 decoration: InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
               ),
-              TextFormField(
+              SizedBox(height: 16),
+              TextField(
                 controller: _dateController,
-                decoration: InputDecoration(labelText: 'Expiry Date (yyyy-mm-dd)'),
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'Expiry Date (yyyy-mm-dd)',
+                  labelStyle: AppFonts.body,
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.calendar_today, color: AppColors.iconColor),
+                    onPressed: _pickExpirationDate,
+                  ),
+                ),
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _predictedPriceController,
                 decoration: InputDecoration(labelText: 'Predicted Price'),
                 enabled: false,
               ),
-              ElevatedButton(
-                onPressed: _fetchPredictedPrice,
-                child: Text('Get Prediction'),
-              ),
-              ElevatedButton(
-                onPressed: _sellMedicine,
-                child: Text('Sell Medicine'),
-              ),
+              SizedBox(height: 16),
+             Column(
+  mainAxisAlignment: MainAxisAlignment.center, // Center vertically (if within a larger container)
+  crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+  children: [
+    ElevatedButton(
+      onPressed: _fetchPredictedPrice,
+      child: Text('Get Prediction', style: AppFonts.button),
+    ),
+    SizedBox(height: 16),
+    ElevatedButton(
+      onPressed: _sellMedicine,
+      child: Text('Sell Medicine', style: AppFonts.button),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.buttonPrimaryColor,
+      ),
+    ),
+  ],
+)
             ],
           ),
         ),
@@ -270,24 +311,23 @@ class SellConfirmationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Confirmation Page",
-          style: AppFonts.headlineLarge,
-        ),
+        title: Text("Confirmation Page", style: AppFonts.headline),
         automaticallyImplyLeading: false,
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryColor,
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(16.0),
           child: Container(
-            color: Colors.greenAccent,
+            color: AppColors.secondaryColor,
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   "Thanks for reselling to us!",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                  style: AppFonts.headline.copyWith(fontSize: 24, fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
@@ -297,7 +337,10 @@ class SellConfirmationPage extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => DonorOptionsPage()),
                     );
                   },
-                  child: Text("Go to Home"),
+                  child: Text("Go to Home", style: AppFonts.button),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonPrimaryColor,
+                  ),
                 ),
               ],
             ),

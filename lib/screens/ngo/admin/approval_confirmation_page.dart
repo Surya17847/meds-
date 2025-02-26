@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart';
-import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 
 class NGOActionConfirmationPage extends StatelessWidget {
   final bool isApproved; // This will determine if it's approval or rejection

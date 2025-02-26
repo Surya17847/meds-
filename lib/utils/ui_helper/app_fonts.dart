@@ -1,33 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:meds/utils/ui_helper/app_colors.dart'; // Import color scheme
 
 class AppFonts {
-  static const String primaryFont = 'Nunito'; // Primary font for regular text
+  static const String primaryFont = 'Poppins'; // Primary font for regular text
   static const String secondaryFont = 'Poppins'; // Secondary font for medium and semi-bold text
 
   static final TextStyle heading = TextStyle(
     fontFamily: secondaryFont,
-    fontWeight: FontWeight.w600, // SemiBold equivalent for Poppins
-    fontSize: 20,
-    color: Colors.black, // Default heading color
+    fontWeight: FontWeight.w600, // SemiBold for emphasis
+    fontSize: 22,
+    color: AppColors.primary, // Use the primary blue-purple color for headings
   );
 
   static final TextStyle body = TextStyle(
     fontFamily: primaryFont,
-    fontWeight: FontWeight.normal, // Regular weight for Nunito
+    fontWeight: FontWeight.normal,
     fontSize: 16,
-    color: Colors.black87, // Slightly lighter text color for readability
+    color: AppColors.textColor, // Dark grey for readability
   );
 
   static final TextStyle button = TextStyle(
     fontFamily: secondaryFont,
-    fontWeight: FontWeight.w500, // Medium weight for Poppins
+    fontWeight: FontWeight.w500, // Medium weight for buttons
     fontSize: 16,
-    color: Colors.white, // Default button text color
+    color: AppColors.buttonTextColor, // White or contrasting color for clarity
+  );
+
+  static final TextStyle caption = TextStyle(
+    fontFamily: primaryFont,
+    fontWeight: FontWeight.w400,
+    fontSize: 14,
+    color: AppColors.textColorSecondary, // Light grey for subtitles
   );
 
   static const TextStyle headlineLarge = TextStyle(
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: FontWeight.bold,
-    color: Colors.black, // Replace with desired color
+    color: AppColors.primary, // Strong contrast for headlines
   );
 }

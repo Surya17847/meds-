@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart';
-import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 import 'package:meds/widgets/snackbar.dart';
 import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:country_picker/country_picker.dart';
@@ -40,7 +39,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (snapshot.exists) {
         final data = snapshot.data() as Map<String, dynamic>;
-
         setState(() {
           nameController.text = data['name'] ?? '';
           emailController.text = data['email'] ?? '';
@@ -48,7 +46,6 @@ class _ProfilePageState extends State<ProfilePage> {
           photoUrl = data['photoUrl'] ?? user!.photoURL;
         });
       } else {
-        // Create a new document if it doesn't exist
         await userRef.set({
           'email': user!.email,
           'name': user!.displayName ?? '',
@@ -64,14 +61,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (pickedFile != null) {
       try {
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('user_profiles/${user?.uid}/profile_picture.png');
+        final storageRef = FirebaseStorage.instance.ref().child('user_profiles/${user?.uid}/profile_picture.png');
         await storageRef.putFile(File(pickedFile.path));
-
         final downloadUrl = await storageRef.getDownloadURL();
-        final userRef = FirebaseFirestore.instance.collection('users').doc(user?.uid);
-        await userRef.update({'photoUrl': downloadUrl});
+
+        await FirebaseFirestore.instance.collection('users').doc(user?.uid).update({'photoUrl': downloadUrl});
 
         setState(() {
           photoUrl = downloadUrl;
@@ -85,9 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _updateProfile() async {
     try {
-      final userRef = FirebaseFirestore.instance.collection('users').doc(user?.uid);
-
-      await userRef.update({
+      await FirebaseFirestore.instance.collection('users').doc(user?.uid).update({
         'name': nameController.text.trim(),
         'phone': '$countryCode ${phoneController.text.trim()}',
       });
@@ -95,7 +87,6 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         isEditing = false;
       });
-
       showCustomSnackBar(context, 'Profile updated successfully');
     } catch (e) {
       showCustomSnackBar(context, 'Error updating profile: $e', isError: true);
@@ -118,24 +109,19 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
+          title: Text('Logout', style: AppFonts.headline),
+          content: Text('Are you sure you want to logout?', style: AppFonts.body),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel', style: AppFonts.button),
             ),
             TextButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
               },
-              child: const Text('Logout'),
+              child: Text('Logout', style: AppFonts.button.copyWith(color: AppColors.errorColor)),
             ),
           ],
         );
@@ -147,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile', style: AppFonts.heading),
+        title: Text('Profile', style: AppFonts.heading.copyWith(color: AppColors.whiteColor)),
         backgroundColor: AppColors.primaryColor,
       ),
       body: Padding(
@@ -158,9 +144,7 @@ class _ProfilePageState extends State<ProfilePage> {
               onTap: isEditing ? _pickAndUploadImage : null,
               child: CircleAvatar(
                 radius: 60,
-                backgroundImage: photoUrl != null
-                    ? NetworkImage(photoUrl!)
-                    : const AssetImage('assets/male_avatar.png') as ImageProvider,
+                backgroundImage: photoUrl != null ? NetworkImage(photoUrl!) : const AssetImage('assets/male_avatar.png') as ImageProvider,
                 backgroundColor: AppColors.primaryColor,
               ),
             ),
@@ -168,27 +152,13 @@ class _ProfilePageState extends State<ProfilePage> {
             TextField(
               controller: nameController,
               enabled: isEditing,
-              decoration: InputDecoration(
-                labelText: 'Name',
-                labelStyle: AppFonts.body,
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primaryColor),
-                ),
-              ),
-              style: AppFonts.body,
+              decoration: InputDecoration(labelText: 'Name', labelStyle: AppFonts.body, border: OutlineInputBorder()),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: emailController,
-              enabled: false, // Email is not editable
-              decoration: InputDecoration(
-                labelText: 'Email',
-                labelStyle: AppFonts.body,
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primaryColor),
-                ),
-              ),
-              style: AppFonts.body,
+              enabled: false,
+              decoration: InputDecoration(labelText: 'Email', labelStyle: AppFonts.body, border: OutlineInputBorder()),
             ),
             const SizedBox(height: 10),
             Row(
@@ -196,15 +166,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 GestureDetector(
                   onTap: _showCountryPicker,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.primaryColor),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Text(
-                      countryCode,
-                      style: AppFonts.body,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                    decoration: BoxDecoration(border: Border.all(color: AppColors.primaryColor), borderRadius: BorderRadius.circular(5)),
+                    child: Text(countryCode, style: AppFonts.body),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -213,39 +177,22 @@ class _ProfilePageState extends State<ProfilePage> {
                     controller: phoneController,
                     enabled: isEditing,
                     keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      labelText: 'Phone Number',
-                      labelStyle: AppFonts.body,
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primaryColor),
-                      ),
-                    ),
-                    style: AppFonts.body,
+                    decoration: InputDecoration(labelText: 'Phone Number', labelStyle: AppFonts.body, border: OutlineInputBorder()),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: isEditing ? _updateProfile : () {
-                setState(() {
-                  isEditing = true;
-                });
-              },
-              child: Text(isEditing ? 'Update Profile' : 'Edit Profile'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                foregroundColor: AppColors.whiteColor,
-              ),
+              onPressed: isEditing ? _updateProfile : () => setState(() => isEditing = true),
+              child: Text(isEditing ? 'Update Profile' : 'Edit Profile', style: AppFonts.button),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor, foregroundColor: AppColors.whiteColor),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _showLogoutDialog,
-              child: const Text('Logout'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.secondaryColor,
-                foregroundColor: AppColors.whiteColor,
-              ),
+              child: Text('Logout', style: AppFonts.button),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.errorColor, foregroundColor: AppColors.whiteColor),
             ),
           ],
         ),

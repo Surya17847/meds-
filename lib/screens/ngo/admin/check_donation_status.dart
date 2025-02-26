@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart';
-import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 
 class CheckDonationStatusPage extends StatelessWidget {
   final List<DonationStatus> donationStatuses = [
@@ -21,8 +20,8 @@ class CheckDonationStatusPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Check Donation Status',
-          style: AppFonts.heading.copyWith(color: AppColors.whiteColor),
+          'Donation Status',
+          style: AppFonts.headline.copyWith(color: AppColors.whiteColor),
         ),
         backgroundColor: AppColors.primaryColor,
       ),

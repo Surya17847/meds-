@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 import 'package:meds/widgets/snackbar.dart';
 
 class ForgotPassword extends StatefulWidget {
@@ -30,13 +31,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           onTap: () {
             myDialogBox(context);
           },
-          child: const Text(
+          child: Text(
             "Forgot Password?",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Colors.blue,
-            ),
+            style: AppFonts.caption,
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart';
-import 'package:meds/utils/ui_helper/app_fonts.dart';
+// import 'package:meds/utils/ui_helper/app_colors.dart';
+// import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 import 'package:meds/screens/giver/donor_options_page.dart';
 
 class DonationConfirmationPage extends StatelessWidget {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meds/screens/giver/Donor/donate_medicine.dart';
+import 'package:meds/screens/ngo/admin/all_requested_medicine.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 
 class DonorDashboard extends StatefulWidget {
   @override
@@ -26,7 +28,6 @@ class _DonorDashboardState extends State<DonorDashboard> {
       'manufacturer': 'XYZ Pharmaceuticals',
       'image': 'Ibuprofen.jpeg',
     },
-    // Add more medicines here
   ];
 
   List<Map<String, dynamic>> filteredMedicines = [];
@@ -45,8 +46,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
     setState(() {
       filteredMedicines = medicines
           .where((medicine) => medicine['name']
-          .toLowerCase()
-          .contains(_searchController.text.toLowerCase()))
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
           .toList();
     });
   }
@@ -55,8 +56,19 @@ class _DonorDashboardState extends State<DonorDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hi!, User', style: Theme.of(context).textTheme.headlineLarge),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text('Donate Medicines', style: AppFonts.headline.copyWith(color: AppColors.whiteColor)),
+        backgroundColor: AppColors.primaryColor,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.list, color: AppColors.whiteColor),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AllRequestedMedicinesPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -65,18 +77,27 @@ class _DonorDashboardState extends State<DonorDashboard> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: AppColors.whiteColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.primaryColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.secondaryColor),
+                ),
                 hintText: 'Search Medicines',
-                prefixIcon: Icon(Icons.search),
+                hintStyle: AppFonts.caption,
+                prefixIcon: Icon(Icons.search, color: AppColors.iconColor),
               ),
             ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: filteredMedicines.length + 1, // One extra for the icon button
+              itemCount: filteredMedicines.length + 1,
               itemBuilder: (context, index) {
                 if (index == filteredMedicines.length) {
-                  // This is the icon below the list
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20.0),
                     child: Column(
@@ -84,21 +105,28 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         Center(
                           child: FloatingActionButton(
                             onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>DonateMedicinePage()));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => DonateMedicinePage()),
+                              );
                             },
-                            child: Icon(Icons.add), // Plus icon
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            backgroundColor: AppColors.primaryColor,
+                            child: Icon(Icons.add, color: AppColors.whiteColor),
                           ),
                         ),
+                        SizedBox(height: 10),
                         Text(
                           "Need to add new medicines to your list?",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: AppFonts.body.copyWith(fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 8),
-                        Text(
-                          "Simply tap the '+' button to quickly add and manage your medicine stock. Ensure that you regularly update expired medicines.",
-                          style: TextStyle(fontSize: 14),
-                          textAlign: TextAlign.center,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(
+                            "Simply tap the '+' button to quickly add and manage your medicine stock. Ensure that you regularly update expired medicines.",
+                            style: AppFonts.caption,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ],
                     ),
@@ -106,7 +134,10 @@ class _DonorDashboardState extends State<DonorDashboard> {
                 }
                 final medicine = filteredMedicines[index];
                 return Card(
+                  color: AppColors.whiteColor,
                   margin: EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 4,
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Row(
@@ -124,13 +155,16 @@ class _DonorDashboardState extends State<DonorDashboard> {
                             children: [
                               Text(
                                 medicine['name']!,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: AppFonts.body.copyWith(fontWeight: FontWeight.bold),
                               ),
-                              Text('Manufacturer: ${medicine['manufacturer']}'),
-                              Text('Expiry Date: ${medicine['expiryDate']}'),
+                              Text(
+                                'Manufacturer: ${medicine['manufacturer']}',
+                                style: AppFonts.caption,
+                              ),
+                              Text(
+                                'Expiry Date: ${medicine['expiryDate']}',
+                                style: AppFonts.caption,
+                              ),
                             ],
                           ),
                         ),

@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:meds/screens/Status/Donated_med.dart';
-import 'package:meds/screens/Status/Selled_med.dart';
+import 'donated_medicines.dart';
+import 'sold_medicines.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 
-class board_selector extends StatefulWidget {
-  const board_selector({super.key});
+class BoardSelector extends StatefulWidget {
+  const BoardSelector({super.key});
 
   @override
-  State<board_selector> createState() => _board_selectorState();
+  State<BoardSelector> createState() => _BoardSelectorState();
 }
 
-class _board_selectorState extends State<board_selector> {
+class _BoardSelectorState extends State<BoardSelector> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('See Your Activities',
-            style: Theme.of(context).textTheme.headlineLarge),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+            style: AppFonts.headline.copyWith(color: AppColors.whiteColor)),
+        backgroundColor: AppColors.primaryColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -32,25 +33,24 @@ class _board_selectorState extends State<board_selector> {
                 );
               },
             ),
-            const SizedBox(height: 16), // Spacing between buttons
-
+            const SizedBox(height: 16),
             BoxButton(
               label: "Purchased Medicines",
               icon: Icons.shopping_cart,
               onTap: () {
-                print("Button 3 tapped");
+                // Handle navigation
               },
             ),
-            const SizedBox(height: 16), // Spacing between buttons
-
+            const SizedBox(height: 16),
             BoxButton(
-                label: "Selled Medicines",
-                icon: FontAwesomeIcons.moneyBillWave,
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => SelledMed()),
-                  );
-                }),
+              label: "Sold Medicines",
+              icon: FontAwesomeIcons.moneyBillWave,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => SelledMed()),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -78,7 +78,7 @@ class BoxButton extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.deepPurpleAccent,
+          color: Colors.white, // Light background color
           borderRadius: BorderRadius.circular(10.0),
           boxShadow: [
             BoxShadow(
@@ -93,16 +93,12 @@ class BoxButton extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: Colors.white,
+              color: AppColors.primaryColor, // Dark color for the icon
             ),
-            const SizedBox(width: 16.0), // Space between icon and text
+            const SizedBox(width: 16.0),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 18.0,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppFonts.button.copyWith(color: AppColors.primaryColor), // Dark text color
             ),
           ],
         ),

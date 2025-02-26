@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // Import app colors
-import 'package:meds/utils/ui_helper/app_fonts.dart';  // Import app fonts
+import 'package:meds/utils/ui_helper/app_theme.dart';  // Import app fonts
 
 class MyButtons extends StatefulWidget {
   final VoidCallback onTap;

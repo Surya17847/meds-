@@ -1,38 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:meds/screens/needy/recipients_home_page.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 
 class OrderConfirmationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order Confirmed',style: Theme.of(context).textTheme.headlineLarge,),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text(
+          'Order Confirmed',
+          style: AppFonts.headline.copyWith(color: AppColors.whiteColor),
+        ),
+        backgroundColor: AppColors.primaryColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               Icons.check_circle_outline,
-              color: Colors.green,
+              color: AppColors.successColor,
               size: 100,
             ),
             SizedBox(height: 20),
             Text(
               'Your order has been confirmed!',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: AppFonts.body.copyWith(color: AppColors.textColor),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 20),
             Text(
               'Thank you for placing your order. We will notify you once the medicine is ready for delivery or pickup.',
-              style: TextStyle(fontSize: 18),
+              style: AppFonts.body,
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 40),
@@ -42,31 +43,18 @@ class OrderConfirmationPage extends StatelessWidget {
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => RecipientsHomePage()), // Replace RecipientsHomePage with the actual class for that page
-                      (Route<dynamic> route) => false, // This will clear all the previous routes
-                );                },
-              child: Text('Go to Home'),
+                  MaterialPageRoute(builder: (context) => RecipientsHomePage()),
+                  (Route<dynamic> route) => false, // Clears previous routes
+                );
+              },
+              child: Text('Go to Home', style: AppFonts.button),
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.buttonPrimaryColor,
+                foregroundColor: AppColors.buttonTextColor,
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: TextStyle(fontSize: 18),
+                textStyle: AppFonts.button,
               ),
             ),
-            SizedBox(height: 20),
-
-            // Button to View Order Details
-            // ElevatedButton(
-            //   onPressed: () {
-            //     // Add logic to navigate to the order details screen if available
-            //     ScaffoldMessenger.of(context).showSnackBar(
-            //       SnackBar(content: Text('Order details will be available soon.')),
-            //     );
-            //   },
-            //   child: Text('View Order Details'),
-            //   style: ElevatedButton.styleFrom(
-            //     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-            //     textStyle: TextStyle(fontSize: 18),
-            //   ),
-            // ),
           ],
         ),
       ),

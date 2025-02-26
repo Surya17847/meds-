@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meds/screens/giver/seller/sell_medicines.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart'; // Importing app_colors.dart
-import 'package:meds/utils/ui_helper/app_fonts.dart'; // Importing app_fonts.dart
+import 'package:meds/utils/ui_helper/app_theme.dart';
 
 class SellerDashboard extends StatefulWidget {
   @override
@@ -34,6 +33,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
   List<Map<String, dynamic>> filteredMedicines = [];
   TextEditingController _searchController = TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     filteredMedicines = medicines;
@@ -46,8 +46,8 @@ class _SellerDashboardState extends State<SellerDashboard> {
     setState(() {
       filteredMedicines = medicines
           .where((medicine) => medicine['name']
-          .toLowerCase()
-          .contains(_searchController.text.toLowerCase()))
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
           .toList();
     });
   }
@@ -56,8 +56,8 @@ class _SellerDashboardState extends State<SellerDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hi!, User', style: Theme.of(context).textTheme.headlineLarge),
-        backgroundColor: AppColors.primaryColor, // Use color from app_colors.dart
+        title: Text('Sell your Medicines', style: AppFonts.headline),
+        backgroundColor: AppColors.primaryColor,
       ),
       body: Column(
         children: [
@@ -69,18 +69,15 @@ class _SellerDashboardState extends State<SellerDashboard> {
                 border: OutlineInputBorder(),
                 hintText: 'Search Medicines',
                 prefixIcon: Icon(Icons.search),
-                hintStyle: TextStyle(
-                  fontFamily: AppFonts.primaryFont, // Use font from app_fonts.dart
-                  fontSize: 14,
-                ),
+                hintStyle: AppFonts.caption,
               ),
             ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: medicines.length + 1, // One extra for the icon button
+              itemCount: filteredMedicines.length + 1, // One extra for the icon button
               itemBuilder: (context, index) {
-                if (index == medicines.length) {
+                if (index == filteredMedicines.length) {
                   // This is the icon below the list
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -89,37 +86,33 @@ class _SellerDashboardState extends State<SellerDashboard> {
                         Center(
                           child: FloatingActionButton(
                             onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>SellMedicinePage()));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SellMedicinePage(),
+                                ),
+                              );
                             },
-                            child: Icon(Icons.add), // Plus icon
-                            backgroundColor: AppColors.primaryColor, // Use color from app_colors.dart
+                            child: Icon(Icons.add, color: AppColors.whiteColor),
+                            backgroundColor: AppColors.primaryColor,
                           ),
                         ),
                         SizedBox(height: 8),
                         Text(
                           "Need to add new medicines to your list?",
-                          style: TextStyle(
-                            fontFamily: AppFonts.primaryFont, // Use font from app_fonts.dart
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textColor, // Use color from app_colors.dart
-                          ),
+                          style: AppFonts.body.copyWith(fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 8),
                         Text(
                           "Simply tap the '+' button to quickly add and manage your medicine stock. Ensure that you regularly update expired medicines.",
-                          style: TextStyle(
-                            fontFamily: AppFonts.primaryFont, // Use font from app_fonts.dart
-                            fontSize: 14,
-                            color: AppColors.textColorSecondary, // Use color from app_colors.dart
-                          ),
+                          style: AppFonts.caption,
                           textAlign: TextAlign.center,
                         ),
                       ],
                     ),
                   );
                 }
-                final medicine = medicines[index];
+                final medicine = filteredMedicines[index];
                 return Card(
                   margin: EdgeInsets.all(10),
                   child: Padding(
@@ -139,28 +132,15 @@ class _SellerDashboardState extends State<SellerDashboard> {
                             children: [
                               Text(
                                 medicine['name']!,
-                                style: TextStyle(
-                                  fontFamily: AppFonts.primaryFont, // Use font from app_fonts.dart
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textColor, // Use color from app_colors.dart
-                                ),
+                                style: AppFonts.body.copyWith(fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 'Manufacturer: ${medicine['manufacturer']}',
-                                style: TextStyle(
-                                  fontFamily: AppFonts.primaryFont,
-                                  fontSize: 14,
-                                  color: AppColors.textColorSecondary, // Use color from app_colors.dart
-                                ),
+                                style: AppFonts.caption,
                               ),
                               Text(
                                 'Expiry Date: ${medicine['expiryDate']}',
-                                style: TextStyle(
-                                  fontFamily: AppFonts.primaryFont,
-                                  fontSize: 14,
-                                  color: AppColors.textColorSecondary, // Use color from app_colors.dart
-                                ),
+                                style: AppFonts.caption,
                               ),
                             ],
                           ),

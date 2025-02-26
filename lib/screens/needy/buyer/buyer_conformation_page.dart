@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:meds/screens/needy/recipients_home_page.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 
 class BuyerConformationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order Details',style: Theme.of(context).textTheme.headlineLarge,),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text(
+          'Order Details',
+          style: AppFonts.headline.copyWith(color: AppColors.whiteColor),
+        ),
+        backgroundColor: AppColors.primaryColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -17,43 +21,19 @@ class BuyerConformationPage extends StatelessWidget {
           children: [
             Text(
               'Thank you for your purchase!',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: AppFonts.headline.copyWith(color: AppColors.textColor),
             ),
             SizedBox(height: 20),
             Text(
               'Here are the details of your purchase:',
-              style: TextStyle(fontSize: 18, color: Colors.black54),
+              style: AppFonts.body,
             ),
             SizedBox(height: 20),
 
-            // Placeholder for order information
-            Row(
-              children: [
-                Text('Medicine:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(width: 10),
-                Text('Paracetamol', style: TextStyle(fontSize: 18)), // Example medicine name
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Text('Quantity:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(width: 10),
-                Text('2 boxes', style: TextStyle(fontSize: 18)), // Example quantity
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              children: [
-                Text('Total Price:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(width: 10),
-                Text('Rs.30', style: TextStyle(fontSize: 18)), // Example price
-              ],
-            ),
+            _buildDetailRow('Medicine:', 'Paracetamol'),
+            _buildDetailRow('Quantity:', '2 boxes'),
+            _buildDetailRow('Total Price:', 'Rs.30'),
+
             SizedBox(height: 30),
 
             // Button to go back to Home Screen
@@ -62,18 +42,37 @@ class BuyerConformationPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => RecipientsHomePage()), // Replace RecipientsHomePage with the actual class for that page
-                        (Route<dynamic> route) => false, // This will clear all the previous routes
-                  );         },
-                child: Text('Go to Home'),
+                    MaterialPageRoute(builder: (context) => RecipientsHomePage()),
+                    (Route<dynamic> route) => false, // Clears previous routes
+                  );
+                },
+                child: Text('Go to Home', style: AppFonts.button),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.buttonPrimaryColor,
+                  foregroundColor: AppColors.buttonTextColor,
                   padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  textStyle: TextStyle(fontSize: 18),
+                  textStyle: AppFonts.button,
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: AppFonts.body.copyWith(color: AppColors.textColor),
+          ),
+          SizedBox(width: 10),
+          Text(value, style: AppFonts.body),
+        ],
       ),
     );
   }

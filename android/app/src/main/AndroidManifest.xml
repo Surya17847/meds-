@@ -2,7 +2,7 @@
     package="com.example.meds">
 
     <application
-        android:label="meds"
+        android:label="MEDS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
