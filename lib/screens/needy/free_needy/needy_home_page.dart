@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meds/screens/needy/free_needy/needy_confirmation_page.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 
 class NeedyHomePage extends StatefulWidget {
   @override
@@ -19,19 +20,25 @@ class _NeedyHomePageState extends State<NeedyHomePage> {
 
   Future<void> fetchMedicines() async {
     try {
-      QuerySnapshot usersSnapshot = await _firestore.collection('users').get();
+      QuerySnapshot pharmacistsSnapshot =
+          await _firestore.collection('Pharmacists').get();
       List<Map<String, dynamic>> tempList = [];
 
-      for (var userDoc in usersSnapshot.docs) {
-        CollectionReference donatedMedicinesRef = userDoc.reference.collection('Donated Medicine');
+      for (var pharmacistDoc in pharmacistsSnapshot.docs) {
+        String donorEmail = pharmacistDoc.data().toString().contains('email')
+            ? pharmacistDoc.get('email')
+            : 'No email';
 
-        QuerySnapshot medicinesSnapshot = await donatedMedicinesRef.get();
+        CollectionReference approvedMedicinesRef =
+            pharmacistDoc.reference.collection('Approved Medicine');
+
+        QuerySnapshot medicinesSnapshot = await approvedMedicinesRef.get();
 
         for (var medicineDoc in medicinesSnapshot.docs) {
-          Map<String, dynamic> medicineData = medicineDoc.data() as Map<String, dynamic>;
+          Map<String, dynamic> medicineData =
+              medicineDoc.data() as Map<String, dynamic>;
 
-          // Add donor email to the medicine data
-          medicineData['donorEmail'] = userDoc['email'];
+          medicineData['donorEmail'] = donorEmail;
           tempList.add(medicineData);
         }
       }
@@ -50,22 +57,24 @@ class _NeedyHomePageState extends State<NeedyHomePage> {
       appBar: AppBar(
         title: Text(
           'Donated Medicines',
-          style: Theme.of(context).textTheme.headlineLarge,
+          style: AppFonts.headline.copyWith(color: AppColors.whiteColor),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: AppColors.primaryColor,
       ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              style: AppFonts.body,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Search Medicines',
-                prefixIcon: Icon(Icons.search),
+                hintStyle: AppFonts.caption,
+                prefixIcon: Icon(Icons.search, color: AppColors.iconColor),
               ),
               onChanged: (value) {
-                // Add search logic if needed
+                // You can add search filtering functionality here
               },
             ),
           ),
@@ -73,90 +82,114 @@ class _NeedyHomePageState extends State<NeedyHomePage> {
             child: medicinesList.isEmpty
                 ? Center(child: CircularProgressIndicator())
                 : ListView.builder(
-              itemCount: medicinesList.length,
-              itemBuilder: (context, index) {
-                final medicine = medicinesList[index];
-                return Card(
-                  margin: EdgeInsets.all(10),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Image.asset(
-                          medicine['ImagePath'] ?? 'assets/images/placeholder.png',
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
+                    itemCount: medicinesList.length,
+                    itemBuilder: (context, index) {
+                      final medicine = medicinesList[index];
+                      return Card(
+                        margin: EdgeInsets.all(10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        elevation: 4,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                '${medicine['MedicineName'] ?? "Unknown Medicine"}',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
+                              // Medicine Image
+                              Image.asset(
+                                medicine['ImagePath'] ??
+                                    'assets/images/placeholder.png',
+                                width: 30,
+                                height: 30,
+                                fit: BoxFit.cover,
+                              ),
+                              SizedBox(width: 10),
+                              // Medicine Details
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // The missing bracketing issue was here.
+                                    // Corrected it by enclosing the column properly
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center, // Center vertically within the available space
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center, // Center horizontally
+                                      children: [
+                                        Text(
+                                          medicine['MedicineName'] ??
+                                              "Unknown Medicine",
+                                          style: AppFonts.body.copyWith(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.secondaryColor,
+                                          ),
+                                        ),
+                                        SizedBox(height: 5),
+                                        _buildRichText(
+                                          label: 'Manufacturer: ',
+                                          value:
+                                              medicine['Manufacturer'] ??
+                                                  "Unknown",
+                                        ),
+                                        _buildRichText(
+                                          label: 'Expiry Date: ',
+                                          value: medicine['ExpirationDate'] ??
+                                              "N/A",
+                                        ),
+                                        _buildRichText(
+                                          label: 'Donor Email: ',
+                                          value:
+                                              medicine['donorEmail'] ?? "Unknown",
+                                        ),
+                                        SizedBox(height: 16), // Spacer before the button
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    OrderConfirmationPage(),
+                                              ),
+                                            );
+                                          },
+                                          child: Text('Claim', style: AppFonts.button),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                AppColors.buttonPrimaryColor,
+                                            foregroundColor: AppColors.buttonTextColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              _buildRichText(
-                                label: 'Manufacturer: ',
-                                value: medicine['Manufacturer'] ?? "Unknown",
-                              ),
-                              _buildRichText(
-                                label: 'Expiry Date: ',
-                                value: medicine['ExpirationDate'] ?? "N/A",
-                              ),
-                              _buildRichText(
-                                label: 'Donor Email: ',
-                                value: medicine['donorEmail'] ?? "Unknown",
                               ),
                             ],
                           ),
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => OrderConfirmationPage(),
-                              ),
-                            );
-                          },
-                          child: Text('Claim'),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRichText({required String label, required String value}) {
+  Widget _buildRichText({required String label, required dynamic value}) {
     return RichText(
       text: TextSpan(
+        style: AppFonts.body.copyWith(color: AppColors.textColor),
         children: [
           TextSpan(
             text: label,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           TextSpan(
-            text: value,
-            style: TextStyle(
-              fontWeight: FontWeight.normal,
-              color: Colors.black,
-            ),
+            text: value.toString(),
           ),
         ],
       ),

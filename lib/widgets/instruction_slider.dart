@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:meds/screens/auth/signup/signup_page.dart';
+import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:meds/utils/ui_helper/app_fonts.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 import 'instruction_card_widget.dart';
 import 'instruction_data.dart';
 
@@ -42,7 +41,7 @@ class _InstructionSliderState extends State<InstructionSlider> {
       _markInstructionsAsSeen();
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const SignUpPage()),
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     } else {
       _pageController.nextPage(
@@ -67,7 +66,7 @@ class _InstructionSliderState extends State<InstructionSlider> {
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const SignUpPage()),
+                      MaterialPageRoute(builder: (context) => const LoginPage()),
                     );
                   },
                   child: Text(

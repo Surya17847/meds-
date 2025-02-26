@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:meds/widgets/snackbar.dart';
 import 'package:meds/utils/ui_helper/app_theme.dart';
+import 'package:meds/widgets/snackbar.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -34,7 +34,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           child: Text(
             "Forgot Password?",
             style: AppFonts.caption,
-            
           ),
         ),
       ),
@@ -64,10 +63,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     Container(),
                     const Text(
                       "Forgot Your Password",
-                      // style: TextStyle(
-                      //   fontWeight: FontWeight.bold,
-                      //   fontSize: 18,
-                      // ),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                     IconButton(
                       onPressed: () {

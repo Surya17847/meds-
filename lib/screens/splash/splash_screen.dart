@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meds/widgets/instruction_slider.dart';
 import 'package:meds/screens/home_screen.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart';
-import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart'; 
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,6 +22,15 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+
+    // Set status bar content color to dark
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent, // Makes status bar background transparent
+        statusBarIconBrightness: Brightness.dark, // Set the status bar icons to dark
+        statusBarBrightness: Brightness.light, // Set the status bar text to dark (use light for dark text)
+      ),
+    );
 
     // Animation setup
     _animationController = AnimationController(
@@ -77,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen>
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.secondaryColor],
+                colors: [AppColors.whiteColor, AppColors.secondaryColor],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -93,29 +102,18 @@ class _SplashScreenState extends State<SplashScreen>
                 children: [
                   // App Logo
                   Image.asset(
-                    'assets/images/meds_start.png',
-                    height: 120,
-                    width: 120,
+                    'assets/images/meds_app_icon.png',
+                    height: 200,
+                    width: 200,
                   ),
                   const SizedBox(height: 20),
 
-                  // App Name
-                  Text(
-                    "MEDS",
-                    style: AppFonts.heading.copyWith(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.whiteColor,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
                   // App Subtitle
                   Text(
-                    "Medicine Exchange and Distribution System",
+                    "Bridging Surplus Need, Reducing waste",
                     style: AppFonts.body.copyWith(
-                      fontSize: 16,
-                      color: AppColors.whiteColor.withOpacity(0.9),
+                      fontSize: 22,
+                      color: Colors.redAccent,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -123,7 +121,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                   // Loading Indicator
                   const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
                     strokeWidth: 2.5,
                   ),
                 ],

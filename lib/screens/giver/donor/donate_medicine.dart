@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meds/utils/ui_helper/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:meds/screens/giver/donor/DonationConfirmationPage.dart';
+import 'package:meds/screens/giver/donor/donation_confirmation_page.dart';
 
 class DonateMedicinePage extends StatefulWidget {
   @override
@@ -20,6 +20,7 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
   final TextEditingController _manufacturerController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
+  // Image Picker
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -40,14 +41,15 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
       lastDate: DateTime(2100),
     );
 
-    if (pickedDate != _selectedDate) {
+    if (pickedDate != null && pickedDate != _selectedDate) {
       setState(() {
         _selectedDate = pickedDate;
-        _expirationDateController.text = "${pickedDate?.toLocal()}".split(' ')[0];
+        _expirationDateController.text = "${pickedDate.toLocal()}".split(' ')[0];
       });
     }
   }
 
+  // Submit donation to Firestore
   Future<void> _submitDonation() async {
     try {
       final firestore = FirebaseFirestore.instance;
@@ -78,7 +80,9 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => DonationConfirmationPage()),
+        MaterialPageRoute(
+          builder: (context) => DonationConfirmationPage(medicine: medicineData),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -92,15 +96,7 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Donate Medicines',
-          style: TextStyle(
-            fontFamily: AppFonts.secondaryFont,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: AppColors.whiteColor,
-          ),
-        ),
+        title: Text('Donate Medicines', style: AppFonts.heading),
         backgroundColor: AppColors.primaryColor,
       ),
       body: Padding(
@@ -109,17 +105,27 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
           child: Column(
             children: <Widget>[
               _buildTextField(_medicineNameController, 'Medicine Name'),
+              SizedBox(height: 20),
               _buildTextField(_strengthController, 'Strength (e.g., 500 mg)'),
-              _buildTextField(_quantityController, 'Quantity Available', keyboardType: TextInputType.number),
-              _buildTextField(_expirationDateController, 'Expiration Date (YYYY-MM-DD)', readOnly: true, icon: Icons.calendar_today, onTap: _pickExpirationDate),
+              SizedBox(height: 20),
+              _buildTextField(_quantityController, 'Quantity Available', isNumber: true),
+              SizedBox(height: 20),
+              _buildDateField(),
+              SizedBox(height: 20),
               _buildTextField(_manufacturerController, 'Manufacturer'),
+              SizedBox(height: 20),
               _buildTextField(_notesController, 'Additional Notes (optional)'),
               SizedBox(height: 20),
               _buildImagePicker(),
-              SizedBox(height: 10),
-              _buildButton('Upload Image', _pickImage, AppColors.secondaryColor),
               SizedBox(height: 30),
-              _buildButton('Submit Donation', _submitDonation, AppColors.primaryColor),
+              ElevatedButton(
+                onPressed: _submitDonation,
+                child: Text('Submit Donation', style: AppFonts.button),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.buttonPrimaryColor,
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                ),
+              ),
             ],
           ),
         ),
@@ -127,46 +133,55 @@ class _DonateMedicinePageState extends State<DonateMedicinePage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {TextInputType keyboardType = TextInputType.text, bool readOnly = false, IconData? icon, VoidCallback? onTap}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        readOnly: readOnly,
-        onTap: onTap,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(fontFamily: AppFonts.primaryFont, color: AppColors.textColor),
-          border: OutlineInputBorder(),
-          suffixIcon: icon != null ? IconButton(icon: Icon(icon, color: AppColors.iconColor), onPressed: onTap) : null,
+  Widget _buildTextField(TextEditingController controller, String label, {bool isNumber = false}) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: AppFonts.body,
+        border: OutlineInputBorder(),
+      ),
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+    );
+  }
+
+  Widget _buildDateField() {
+    return TextField(
+      controller: _expirationDateController,
+      readOnly: true,
+      decoration: InputDecoration(
+        labelText: 'Expiration Date (YYYY-MM-DD)',
+        labelStyle: AppFonts.body,
+        border: OutlineInputBorder(),
+        suffixIcon: IconButton(
+          icon: Icon(Icons.calendar_today, color: AppColors.iconColor),
+          onPressed: _pickExpirationDate,
         ),
       ),
     );
   }
 
   Widget _buildImagePicker() {
-    return Container(
-      width: double.infinity,
-      height: 200,
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.textColor),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Medicine_Image == null
-          ? Center(child: Text('No image selected', style: TextStyle(color: AppColors.textColor)))
-          : Image.file(File(Medicine_Image!), fit: BoxFit.cover),
-    );
-  }
-
-  Widget _buildButton(String text, VoidCallback onPressed, Color color) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Text(text),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-      ),
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          height: 200,
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.textColor),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Medicine_Image == null
+              ? Center(child: Text('No image selected', style: AppFonts.caption))
+              : Image.file(File(Medicine_Image!), fit: BoxFit.cover),
+        ),
+        SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: _pickImage,
+          child: Text('Upload Image', style: AppFonts.button),
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.buttonPrimaryColor),
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meds/utils/ui_helper/app_fonts.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 import 'instruction_card_model.dart';
 
 class InstructionCardWidget extends StatelessWidget {

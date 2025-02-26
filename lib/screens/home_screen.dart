@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meds/screens/auth/login/login_page.dart';
-import 'package:meds/screens/giver/donor_options_page.dart';
+import 'package:meds/screens/giver/donor/donor_options_page.dart';
 import 'package:meds/screens/needy/recipients_home_page.dart';
 import 'package:meds/screens/ngo/ngo_dashboard_page.dart';
-import 'package:meds/widgets/instruction_slider.dart';
+// import 'package:meds/widgets/instruction_slider.dart';
 import 'package:meds/widgets/app_drawer.dart';
-import 'package:meds/utils/ui_helper/app_colors.dart';
-import 'package:meds/utils/ui_helper/app_fonts.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -23,35 +23,35 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: AppColors.primaryColor,
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              bool? exit = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Log Out', style: AppFonts.heading),
-                  content: Text('Are you sure you want to exit?', style: AppFonts.body),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: Text('Cancel', style: AppFonts.body),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        Navigator.of(context).pop(true);
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
-                        );
-                      },
-                      child: Text('Yes', style: AppFonts.body.copyWith(fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.logout, color: Colors.white),
+          //   onPressed: () async {
+          //     bool? exit = await showDialog<bool>(
+          //       context: context,
+          //       builder: (context) => AlertDialog(
+          //         title: Text('Log Out', style: AppFonts.heading),
+          //         content: Text('Are you sure you want to exit?', style: AppFonts.body),
+          //         actions: [
+          //           TextButton(
+          //             onPressed: () => Navigator.of(context).pop(false),
+          //             child: Text('Cancel', style: AppFonts.body),
+          //           ),
+          //           TextButton(
+          //             onPressed: () async {
+          //               await FirebaseAuth.instance.signOut();
+          //               Navigator.of(context).pop(true);
+          //               Navigator.pushReplacement(
+          //                 context,
+          //                 MaterialPageRoute(builder: (context) => const LoginPage()),
+          //               );
+          //             },
+          //             child: Text('Yes', style: AppFonts.body.copyWith(fontWeight: FontWeight.bold)),
+          //           ),
+          //         ],
+          //       ),
+          //     );
+          //   },
+          // ),
         ],
       ),
       backgroundColor: AppColors.backgroundColor,
@@ -89,7 +89,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               Icon(icon, size: 50, color: color),
               const SizedBox(height: 10),
-              Text(title, style: AppFonts.heading.copyWith(color: color)),
+              Text(title, style: AppFonts.headline.copyWith(color: color)),
             ],
           ),
         ),

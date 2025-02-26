@@ -135,7 +135,7 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Column(
             children: [
               const SizedBox(height: 50),
-              Image.asset('assets/images/meds_icon.png', height: 100, width: 100),
+              Image.asset('assets/images/meds_app_icon.png', height: 150, width: 150),
               const SizedBox(height: 20),
               TextFormField(
                 controller: emailController,
@@ -214,16 +214,12 @@ class _SignUpPageState extends State<SignUpPage> {
                   onPressed: signUpWithGoogle,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.account_circle, color: Colors.white),
-                      SizedBox(width: 10),
+                    children: [
+                      const Icon(Icons.account_circle, color: Colors.white),
+                      const SizedBox(width: 10),
                       Text(
                         "Sign Up with Google",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
+                        style: AppFonts.button,
                       ),
                     ],
                   ),
