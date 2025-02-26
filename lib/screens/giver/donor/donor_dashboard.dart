@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meds/screens/giver/Donor/donate_medicine.dart';
+// import 'package:meds/utils/ui_helper/app_colors.dart';
+import 'package:meds/utils/ui_helper/app_theme.dart';
 
 class DonorDashboard extends StatefulWidget {
   @override
@@ -26,7 +28,6 @@ class _DonorDashboardState extends State<DonorDashboard> {
       'manufacturer': 'XYZ Pharmaceuticals',
       'image': 'Ibuprofen.jpeg',
     },
-    // Add more medicines here
   ];
 
   List<Map<String, dynamic>> filteredMedicines = [];
@@ -45,8 +46,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
     setState(() {
       filteredMedicines = medicines
           .where((medicine) => medicine['name']
-          .toLowerCase()
-          .contains(_searchController.text.toLowerCase()))
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
           .toList();
     });
   }
@@ -55,8 +56,11 @@ class _DonorDashboardState extends State<DonorDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hi!, User', style: Theme.of(context).textTheme.headlineLarge),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text(
+          'Hi!, User',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: AppColors.primaryColor,
       ),
       body: Column(
         children: [
@@ -73,10 +77,9 @@ class _DonorDashboardState extends State<DonorDashboard> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: filteredMedicines.length + 1, // One extra for the icon button
+              itemCount: filteredMedicines.length + 1,
               itemBuilder: (context, index) {
                 if (index == filteredMedicines.length) {
-                  // This is the icon below the list
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20.0),
                     child: Column(
@@ -84,15 +87,19 @@ class _DonorDashboardState extends State<DonorDashboard> {
                         Center(
                           child: FloatingActionButton(
                             onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>DonateMedicinePage()));
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => DonateMedicinePage()));
                             },
-                            child: Icon(Icons.add), // Plus icon
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            child: Icon(Icons.add),
+                            backgroundColor: AppColors.primaryColor,
                           ),
                         ),
                         Text(
                           "Need to add new medicines to your list?",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 8),
                         Text(
