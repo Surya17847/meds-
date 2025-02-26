@@ -12,7 +12,7 @@ class RecipientsHomePage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            'NGO Dashboard',
+            'Needy Dashboard',
             style: AppFonts.heading.copyWith(color: AppColors.whiteColor),
           ),
           automaticallyImplyLeading: false,

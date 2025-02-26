@@ -1,10 +1,22 @@
-// import 'dart:io';
-// import 'package:http/http.dart' as http;
-// import 'package:mime_type/mime_type.dart';
-// import 'package:firebase_storage/firebase_storage.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloudinary_sdk/cloudinary_sdk.dart';
-//
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloudinary_url_gen/cloudinary.dart';
+import 'package:cloudinary_flutter/image/cld_image.dart';
+import 'package:cloudinary_flutter/cloudinary_context.dart';
+import 'package:meds/utils/.env';
+
+var cloudinary = Cloudinary.fromStringUrl(CLOUDINARY_URL);
+String url = cloudinary.image('sample.jpg').toString();
+
+// String url = (cloudinary.image('sample.jpg')
+//   ..transformation(Transformation()
+//     ..resize(Resize.crop()
+//       ..width(100)
+//       ..height(150))))
+//     .toString();
+// /*
 // class CloudinaryHelper {
 //   final Cloudinary _cloudinary;
 //
@@ -53,3 +65,4 @@
 //     }
 //   }
 // }
+// */
