@@ -46,7 +46,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse("192.168.0.104:8000/assess_symptoms"), // Use 127.0.0.1 for iOS/physical devices
+        Uri.parse("http://192.168.0.104:8000/assess_symptoms"), // Replace with your PC's local IP
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"symptoms": text}),
       );
