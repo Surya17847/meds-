@@ -4,11 +4,10 @@ import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:meds/screens/giver/donor_options_page.dart';
 import 'package:meds/screens/needy/recipients_home_page.dart';
 import 'package:meds/screens/ngo/ngo_dashboard_page.dart';
-import 'package:meds/widgets/instruction_slider.dart';
 import 'package:meds/widgets/app_drawer.dart';
 import 'package:meds/utils/ui_helper/app_colors.dart';
 import 'package:meds/utils/ui_helper/app_fonts.dart';
-
+import 'package:meds/widgets/chatbot_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -90,7 +89,7 @@ class HomeScreen extends StatelessWidget {
             ),
             // Main Card for Giver, Donor, and NGO (1 in a row)
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(18.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -219,29 +218,27 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20), // Extra spacing before button
             // Button for Instruction Slider
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to Instruction Slider page
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const InstructionSlider()),
-                  );
-                },
-                child: const Text('Instruction Slider'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 30.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20), // Extra spacing for better layout
+
+            // Extra spacing for better layout
           ],
+
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ChatbotScreen()),
+          );
+        },
+        backgroundColor: AppColors.primaryColor,
+        child: CircleAvatar(
+          backgroundImage: AssetImage('assets/images/ai_chat.gif'),
+          radius: 40,
+        ),
+
       ),
     );
   }
+
 }

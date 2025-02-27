@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:meds/screens/giver/Donor/donate_medicine.dart';
 import 'package:meds/screens/ngo/admin/all_requested_medicine.dart';
+import 'package:meds/utils/ui_helper/app_colors.dart';
+import 'package:meds/utils/ui_helper/app_fonts.dart';
 import 'donation_request.dart'; // Import DonationRequestPage
 
 class DonorDashboard extends StatefulWidget {
@@ -57,8 +59,8 @@ class _DonorDashboardState extends State<DonorDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hi!, User', style: Theme.of(context).textTheme.headlineLarge),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text('Hi!, User', style: AppFonts.headlineLarge),
+        backgroundColor:  AppColors.primary,
         actions: [
           IconButton(
             icon: Icon(Icons.list),

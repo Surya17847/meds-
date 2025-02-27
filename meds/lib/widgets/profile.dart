@@ -11,6 +11,7 @@ import 'package:meds/screens/auth/login/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:country_picker/country_picker.dart';
 
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -159,6 +160,7 @@ class _ProfilePageState extends State<ProfilePage> {
               onTap: isEditing ? _pickAndUploadImage : null,
               child: CircleAvatar(
                 radius: 60,
+
                 backgroundImage: photoUrl != null
                     ? NetworkImage(photoUrl!)
                     : const AssetImage('assets/male_avatar.png') as ImageProvider,
@@ -247,6 +249,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 backgroundColor: AppColors.secondaryColor,
                 foregroundColor: AppColors.whiteColor,
               ),
+
             ),
           ],
         ),

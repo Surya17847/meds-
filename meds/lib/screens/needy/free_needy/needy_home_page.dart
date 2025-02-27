@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meds/screens/needy/free_needy/needy_confirmation_page.dart';
+import 'package:meds/utils/ui_helper/app_colors.dart';
+import 'package:meds/utils/ui_helper/app_fonts.dart';
 
 class NeedyHomePage extends StatefulWidget {
   @override
@@ -60,9 +62,9 @@ class _NeedyHomePageState extends State<NeedyHomePage> {
       appBar: AppBar(
         title: Text(
           'Donated Medicines',
-          style: Theme.of(context).textTheme.headlineLarge,
+          style: AppFonts.headlineLarge,
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: AppColors.primary,
       ),
       body: Column(
         children: [
@@ -94,12 +96,12 @@ class _NeedyHomePageState extends State<NeedyHomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Image.asset(
-                          medicine['ImagePath'] ?? 'assets/images/placeholder.png',
-                          width: 50,
-                          height: 50,
+                          medicine['ImagePath'] ?? 'assets/images/Paracetamol.jpeg',
+                          height: 20,
+                          width: 20,
                           fit: BoxFit.cover,
                         ),
-                        SizedBox(width: 10),
+                        SizedBox(width: 5),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
