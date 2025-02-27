@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "590006646893",
+    "project_id": "meds-53264",
+    "storage_bucket": "meds-53264.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:590006646893:android:f9c186424488e6398ea764",
+        "android_client_info": {
+          "package_name": "com.example.meds"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "590006646893-o730opoq5emrj79inlsp0sa6l3vggjde.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.meds",
+            "certificate_hash": "bed3d0db311be068af1c93bf28483b6a8bb746f9"
+          }
+        },
+        {
+          "client_id": "590006646893-bh0s7c5po6csu68ispcj08u8n4oe1de4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAd9K8qNnBnhHnDdYcFtyu6GKaNcct9Egc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "590006646893-bh0s7c5po6csu68ispcj08u8n4oe1de4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "590006646893-nhf98n5srocj8dcdr9ur8hhvmiqfbnfq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.meds"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
