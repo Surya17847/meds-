@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meds/screens/Status/Donated_med.dart';
 import 'package:meds/screens/Status/Selled_med.dart';
+import 'package:meds/screens/Status/purchased_med.dart';
+
 
 class board_selector extends StatefulWidget {
   const board_selector({super.key});
@@ -39,9 +41,10 @@ class _board_selectorState extends State<board_selector> {
               label: "Purchased Medicines",
               icon: Icons.shopping_cart,
               onTap: () {
-                print("Button 3 tapped");
-              },
-            ),
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => PurchMed()),
+                );
+              }),
             const SizedBox(height: 16), // Spacing between buttons
 
             BoxButton(

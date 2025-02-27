@@ -253,16 +253,19 @@ class _SellMedicinePageState extends State<SellMedicinePage> {
                 decoration: InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
               ),
-              TextField(
-                controller: _dateController,
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: 'Expiry Date (yyyy-mm-dd)',
-                  labelStyle: TextStyle(fontFamily: AppFonts.primaryFont, color: AppColors.textColor),
-                  border: OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.calendar_today, color: AppColors.iconColor),
-                    onPressed: _pickExpirationDate,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _dateController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: 'Expiry Date (yyyy-mm-dd)',
+                    labelStyle: TextStyle(fontFamily: AppFonts.primaryFont, color: AppColors.textColor),
+                    border: OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.calendar_today, color: AppColors.iconColor),
+                      onPressed: _pickExpirationDate,
+                    ),
                   ),
                 ),
               ),

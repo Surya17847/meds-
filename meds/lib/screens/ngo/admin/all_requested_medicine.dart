@@ -35,6 +35,11 @@ class _AllRequestedMedicinesPageState extends State<AllRequestedMedicinesPage> {
 
       // Loop through each user document
       for (var userDoc in usersSnapshot.docs) {
+        // Fetch requester's email from the user document
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final String requesterEmail = userData['email'] ?? 'Unknown Email';
+        final String requesterName= userData['name']??'Unknown Name';
+
         // Access the subcollection reference for "Requested Medicines" under each user
         CollectionReference requestedMedicinesRef = userDoc.reference.collection('Requested Medicines');
 
@@ -52,16 +57,19 @@ class _AllRequestedMedicinesPageState extends State<AllRequestedMedicinesPage> {
           final String urgency = medicineData['urgency'] ?? 'No Urgency';
           final Timestamp? timestamp = medicineData['timestamp'];
 
-          // Ensure timestamp is valid, and convert to a string if it exists
+          // Convert timestamp to a string if it exists
           final String formattedTimestamp = timestamp != null ? timestamp.toDate().toString() : 'No Timestamp';
 
-          // Add the medicine data to the temporary list
+          // Add the medicine data to the temporary list, including the requester's email
           tempList.add({
             'medicineName': medicineName,
             'quantity': quantity,
             'strength': strength,
             'urgency': urgency,
             'timestamp': formattedTimestamp,
+            'name':requesterName,
+            'requester': requesterEmail,
+
           });
         }
       }
@@ -137,6 +145,8 @@ class _AllRequestedMedicinesPageState extends State<AllRequestedMedicinesPage> {
                 final strength = medicine['strength'] ?? 'Unknown Strength';
                 final urgency = medicine['urgency'] ?? 'No Urgency';
                 final timestamp = medicine['timestamp'] ?? 'No Timestamp';
+                final r_name = medicine['name'] ?? 'Unknown Name';
+                final requester = medicine['requester'] ?? 'Unknown Requester';
 
                 return Card(
                   margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -185,6 +195,24 @@ class _AllRequestedMedicinesPageState extends State<AllRequestedMedicinesPage> {
                         SizedBox(height: 8),
                         Text(
                           'Requested on: $timestamp',
+                          style: TextStyle(
+                            fontFamily: AppFonts.primaryFont,
+                            fontSize: 12,
+                            color: AppColors.textColorSecondary,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Requester Name: $r_name',
+                          style: TextStyle(
+                            fontFamily: AppFonts.primaryFont,
+                            fontSize: 12,
+                            color: AppColors.textColorSecondary,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Requester Email: $requester',
                           style: TextStyle(
                             fontFamily: AppFonts.primaryFont,
                             fontSize: 12,
