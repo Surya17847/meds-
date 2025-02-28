@@ -57,7 +57,7 @@ class _DonatedMed_pageState extends State<SelledMed> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Selled Medicines',
+        title: Text('Sold Medicines',
             style: Theme.of(context).textTheme.headlineLarge),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),

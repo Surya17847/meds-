@@ -78,13 +78,13 @@ class MedicineDashboard extends StatelessWidget {
   /// Builds an info card with an icon, title, and value.
   /// The card now has a light (white) background with dark contents for readability.
   Widget _buildInfoCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-    bool fullWidth = false,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required String value,
+        required Color color,
+        bool fullWidth = false,
+      }) {
     final Widget card = Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),

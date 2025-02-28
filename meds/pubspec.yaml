@@ -49,6 +49,7 @@ dependencies:
   cloudinary_url_gen: ^1.0.0
   http: ^0.13.5
   flutter_dotenv: ^5.2.1
+  lucide_icons: ^0.257.0
 
 
 
